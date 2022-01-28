@@ -12,6 +12,7 @@ type Tournament struct{
 	GameName		*string					`json:"GameName" validate:"required,min=2,max=100"`
 	Icon			*string					`json:"icon" validate:"required,min=2,max=100"`
 	TournamentType	*string					`json:"TournamentType" validate:"required,eq=PUBLIC|eq=PRIVATE"`
+	Payment			*string					`json:"Payment" validate:"required,eq=FREE|eq=PAID|eq=SPONSORED"`
 	TournamentMode	*string					`json:"TournamentMode" validate:"required,eq=MULTIPLAYER|eq=BATTLEROYALE"`
 	TournamentSize	*int			    	`json:"TournamentSize" validate:"required"`
 	Team			*string					`json:"Team" validate:"required,eq=SINGLE|eq=DUO|eq=SQUAD"`
