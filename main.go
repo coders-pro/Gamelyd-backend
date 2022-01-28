@@ -3,11 +3,9 @@ package main
 import (
 	"log"
 	"os"
-	"time"
 
+	cor "github.com/Gameware/middleware"
 	routes "github.com/Gameware/routes"
-	// "github.com/Gameware/docs"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -27,17 +25,7 @@ func main(){
 
 	router := gin.New()
 	router.Use(gin.Logger())
-	router.Use(cors.New(cors.Config{
-        AllowOrigins:     []string{"*"},
-        AllowMethods:     []string{"PUT", "PATCH", "POST", "GET"},
-        AllowHeaders:     []string{"Origin"},
-        ExposeHeaders:    []string{"Content-Length"},
-        AllowCredentials: true,
-        AllowOriginFunc: func(origin string) bool {
-            return origin == "*"
-        },
-        MaxAge: 12 * time.Hour,
-    }))
+	router.Use(cor.CORSMiddleware())
 
 	routes.AuthRoutes(router)
 	routes.UserRoutes(router)
