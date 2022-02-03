@@ -24,4 +24,6 @@ type Tournament struct{
 	Active			bool					`json:"Active" validate:"required"`
 	IsDeleted		bool					`json:"IsDeleted" validate:"required"`
 	IsSuspended		bool					`json:"IsSuspended" validate:"required"`
+	Link			string					`json:"Link"`
+	Date			string					`json:"Date" validate:"required"`
 }

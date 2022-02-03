@@ -63,36 +63,33 @@ func SaveTournament() gin.HandlerFunc{
 func RegisterTournament()gin.HandlerFunc{
 	return func(c *gin.Context){
 		tournamentId := c.Param("tournamentId")
-		userId := c.Param("userId")
-		userName := c.Param("userName")
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		var registerTournament models.RegisterTournament
+
+		if err := c.BindJSON(&registerTournament); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "hasError": true})
+			return
+		}
 
 		registerTournament.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		registerTournament.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		registerTournament.ID = primitive.NewObjectID()
 		registerTournament.TournamentId = tournamentId
 		registerTournament.RegisterTournamentId = registerTournament.ID.Hex()
-		registerTournament.User_id = userId
-		registerTournament.UserName = userName
 
-		count, err := registerTournamentCollection.CountDocuments(ctx, bson.M{"user_id": userId})
-		defer cancel()
-		if err != nil {
-			log.Panic(err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error":"error occured while checking for the user", "hasError": true})
-			return
-		}
+		// count, err := registerTournamentCollection.CountDocuments(ctx, bson.M{"user_id": userId})
+		// defer cancel()
+		// if err != nil {
+		// 	log.Panic(err)
+		// 	c.JSON(http.StatusInternalServerError, gin.H{"error":"error occured while checking for the user", "hasError": true})
+		// 	return
+		// }
 
-		if count > 0 {
-			c.JSON(http.StatusInternalServerError, gin.H{"error":"User already registered", "hasError": true})
-			return
-		}
+		// if count > 0 {
+		// 	c.JSON(http.StatusInternalServerError, gin.H{"error":"User already registered", "hasError": true})
+		// 	return
+		// }
 
-		if err := c.BindJSON(&registerTournament); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "hasError": true})
-			return
-		}
 
 		validationErr := validate.Struct(registerTournament)
 		if validationErr != nil {
