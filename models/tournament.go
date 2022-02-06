@@ -21,9 +21,13 @@ type Tournament struct{
 	Updated_at		time.Time				`json:"Updated_at"`
 	TournamentId	string					`json:"TournamentId" validate:"required"`
 	User_id			string					`json:"User_id" validate:"required"`
-	Active			bool					`json:"Active" validate:"required"`
-	IsDeleted		bool					`json:"IsDeleted" validate:"required"`
-	IsSuspended		bool					`json:"IsSuspended" validate:"required"`
+	Active			bool					`json:"Active"`
+	IsDeleted		bool					`json:"IsDeleted"`
+	IsSuspended		bool					`json:"IsSuspended"`
+	Start			bool					`json:"Start"`
 	Link			string					`json:"Link"`
-	Date			string					`json:"Date" validate:"required"`
+	Date			string					`json:"Date"`
+	IsPaid			bool					`json:"IsPaid"`
+	RefNumber		string					`json:"RefNumber"`
+	PaymentChannel	string					`json:"PaymentChannel"`
 }

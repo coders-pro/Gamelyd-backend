@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strconv"
 
@@ -30,15 +29,10 @@ func SaveTournament() gin.HandlerFunc{
 
 		if err := c.BindJSON(&tournament); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "hasError": true})
+			defer cancel()
 			return
 		}
-
-		validationErr := validate.Struct(tournament)
-		if validationErr != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error":validationErr.Error(), "hasError": true})
-			return
-		}
-
+		
 		tournament.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		tournament.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		tournament.ID = primitive.NewObjectID()
@@ -47,11 +41,23 @@ func SaveTournament() gin.HandlerFunc{
 		tournament.Active = false
 		tournament.IsDeleted = false
 		tournament.IsSuspended = false
+		tournament.Start = false
+		tournament.IsPaid = false
+
+		
+
+		validationErr := validate.Struct(tournament)
+		if validationErr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error":validationErr.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
 
 		resultInsertionNumber, insertErr := tournamentCollection.InsertOne(ctx, tournament)
 		if insertErr !=nil {
-			msg := fmt.Sprintf("item was not created")
+			msg := "item was not created"
 			c.JSON(http.StatusInternalServerError, gin.H{"error":msg, "hasError": true})
+			defer cancel()
 			return
 		}
 		defer cancel()
@@ -68,6 +74,7 @@ func RegisterTournament()gin.HandlerFunc{
 
 		if err := c.BindJSON(&registerTournament); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "hasError": true})
+			defer cancel()
 			return
 		}
 
@@ -94,14 +101,16 @@ func RegisterTournament()gin.HandlerFunc{
 		validationErr := validate.Struct(registerTournament)
 		if validationErr != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error":validationErr.Error(), "hasError": true})
+			defer cancel()
 			return
 		}
 		
 
 		resultInsertionNumber, insertErr := registerTournamentCollection.InsertOne(ctx, registerTournament)
 		if insertErr !=nil {
-			msg := fmt.Sprintf("item was not created")
+			msg := "item was not created"
 			c.JSON(http.StatusInternalServerError, gin.H{"error":msg, "hasError": true})
+			defer cancel()
 			return
 		}
 		defer cancel()
@@ -140,6 +149,7 @@ func ListPartTournament() gin.HandlerFunc{
 		defer cancel()
 		if err != nil{
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "hasError": true})
+			defer cancel()
 			return
 		}
 
@@ -147,6 +157,7 @@ func ListPartTournament() gin.HandlerFunc{
 
 		if err = returnTournament.All(ctx, &fil); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "hasError": true})
+			defer cancel()
 			return
 		}
 		
