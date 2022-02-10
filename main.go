@@ -30,6 +30,7 @@ func main(){
 	routes.AuthRoutes(router)
 	routes.UserRoutes(router)
 	routes.TournamentRoutes(router)
+	routes.DrawRoutes(router)
 
 	
 	router.GET("/api-1", func(c *gin.Context){

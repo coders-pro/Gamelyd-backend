@@ -14,9 +14,10 @@ type  Team struct {
 
 type RegisterTournament struct{
 	ID						primitive.ObjectID		`bson:"_id" validate:"required"`
-	Players					[]*Team					`json:"Players" validate:"required"`
+	Players					[]Player				`json:"Players" validate:"required"`
 	Created_at				time.Time				`json:"Created_at" validate:"required"`
 	Updated_at				time.Time				`json:"Updated_at" validate:"required"`
 	TournamentId			string					`json:"TournamentId" validate:"required"`
 	RegisterTournamentId	string					`json:"RegisterTournamentId" validate:"required"`
+	TeamName				string					`json:"TeamName" validate:"required"`
 }

@@ -56,14 +56,6 @@ func Signup()gin.HandlerFunc{
 			
 		}
 
-		validationErr := validate.Struct(user)
-		if validationErr != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error":validationErr.Error(), "hasError": true})
-			defer cancel()
-			return
-		}
-
-		
 		user.IsSuspended = false
 		user.IsDeleted = false
 		user.EmailVerified = false
@@ -74,6 +66,14 @@ func Signup()gin.HandlerFunc{
 		token, refreshToken, _ := helper.GenerateAllTokens(*user.Email, *user.First_name, *user.Last_name, *user.User_type, *&user.User_id)
 		user.Token = &token
 		user.Refresh_token = &refreshToken
+
+		validationErr := validate.Struct(user)
+		if validationErr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error":validationErr.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+
 
 		count, err := userCollection.CountDocuments(ctx, bson.M{"email":user.Email})
 		defer cancel()
