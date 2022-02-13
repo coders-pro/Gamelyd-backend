@@ -203,12 +203,7 @@ func Draw() gin.HandlerFunc{
 				}else {
 					newCount++
 				}
-		}
-
-		
-
-	
-			
+		}	
 	}
 	if len(newDraw)%2 != 0 {
 		if len(newDraw) != 2 {
@@ -287,6 +282,7 @@ func AddWinner() gin.HandlerFunc{
 		var winner Winner
 		
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
 
 		if err := c.BindJSON(&winner); err != nil {
 			c.JSON(http.StatusOK, gin.H{"error":err.Error(), "hasError": true})
@@ -324,5 +320,107 @@ func AddWinner() gin.HandlerFunc{
 		}
 		
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "draws":result, "hasError": false})
+	}
+}
+
+func AddTime() gin.HandlerFunc{
+	return func(c *gin.Context){
+		id := c.Param("drawId")
+		type Data struct {
+			Time string		`json:"Time" validate:"required"`
+			Date string		`json:"Date" validate:"required"`
+		}
+		var data Data
+		
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+
+		if err := c.BindJSON(&data); err != nil {
+			c.JSON(http.StatusOK, gin.H{"error":err.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+		
+		validationErr := validate.Struct(data)
+		if validationErr != nil {
+			c.JSON(http.StatusOK, gin.H{"error":validationErr.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+		fmt.Printf("%+v\n", ctx)
+		
+
+		filter := bson.M{"drawid": id}
+
+		update := bson.M{
+			"$set": bson.M{"date": data.Date, "time": data.Time},
+		}
+
+		upsert := true
+		after := options.After
+		opt := options.FindOneAndUpdateOptions{
+			ReturnDocument: &after,
+			Upsert:         &upsert,
+		}
+
+		result := drawCollection.FindOneAndUpdate(ctx, filter, update, &opt)
+		if result.Err() != nil {
+			c.JSON(http.StatusOK, gin.H{"error":validationErr.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+		
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "draws":result, "hasError": false})
+	}
+}
+
+func AddScore() gin.HandlerFunc{
+	return func(c *gin.Context){
+		id := c.Param("drawId")
+		type Score struct {
+			Team1 int		`json:"Team1" validate:"required"`
+			Team2 int		`json:"Team2" validate:"required"`
+		}
+		var data Score
+		
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+
+		if err := c.BindJSON(&data); err != nil {
+			c.JSON(http.StatusOK, gin.H{"error":err.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+		
+		validationErr := validate.Struct(data)
+		if validationErr != nil {
+			c.JSON(http.StatusOK, gin.H{"error":validationErr.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+		fmt.Printf("%+v\n", ctx)
+		
+
+		filter := bson.M{"drawid": id}
+
+		update := bson.M{
+			"$set": bson.M{"Team1Score": data.Team1 , "Team2Score": data.Team2},
+		}
+
+		upsert := true
+		after := options.After
+		opt := options.FindOneAndUpdateOptions{
+			ReturnDocument: &after,
+			Upsert:         &upsert,
+		}
+
+		result := drawCollection.FindOneAndUpdate(ctx, filter, update, &opt)
+		if result.Err() != nil {
+			c.JSON(http.StatusOK, gin.H{"error":validationErr.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+		
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "draws":result, "hasError": false})
 	}
 }

@@ -12,7 +12,7 @@ type  Player struct {
 }
 
 type  Teams struct {
-	TeamName		string					`json:"UserName" validate:"required"`
+	TeamName		string					`json:"TeamName" validate:"required"`
 	Players			[]Player				`json:"Players" validate:"required"`
 }
 
@@ -28,6 +28,9 @@ type Draw struct{
 	Winner					string					`json:"Winner" validate:"eq=Team1|eq=Team2"`
 	Time					string					`json:"Time"`
 	Date					string					`json:"Date"`
+	Team1Score				int						`json:"Team1Score"`
+	Team2Score				int						`json:"Team2Score"`
+
 }
 
 
