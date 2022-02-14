@@ -175,12 +175,12 @@ func CheckUserName() gin.HandlerFunc{
 		defer cancel()
 		if err != nil {
 			log.Panic(err)
-			c.JSON(http.StatusOK, gin.H{"error":"error occured while checking for the user name", "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":"error occured while checking for the user name", "hasError": true})
 			return
 		}
 
 		if count > 0 {
-			c.JSON(http.StatusOK, gin.H{"error":"Username already taken", "hasError": false, "count": count, "userName": userName})
+			c.JSON(http.StatusOK, gin.H{"message":"Username already taken", "hasError": true, "count": count, "userName": userName})
 			return
 		}
 
