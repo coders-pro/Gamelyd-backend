@@ -207,21 +207,20 @@ func GetTournaments() gin.HandlerFunc{
 			page = 1
 		}
 
-		startIndex := (page - 1) * recordPerPage
-		startIndex, err = strconv.Atoi(c.Query("startIndex"))
+		// startIndex := (page - 1) * recordPerPage
+		// startIndex, err = strconv.Atoi(c.Query("startIndex"))
 
-		matchStage := bson.D{{"$match", bson.D{{}}}}
-		groupStage := bson.D{{"$group", bson.D{
-			{"_id", bson.D{{"_id", "null"}}}, 
-			{"total_count", bson.D{{"$sum", 1}}}, 
-			{"data", bson.D{{"$push", "$$ROOT"}}}}}}
-		projectStage := bson.D{
-			{"$project", bson.D{
-				{"_id", 0},
-				{"total_count", 1},
-				{"user_items", bson.D{{"$slice", []interface{}{"$data", startIndex, recordPerPage}}}},}}}
-		result,err := tournamentCollection.Aggregate(ctx, mongo.Pipeline{
-			matchStage, groupStage, projectStage})
+		// matchStage := bson.D{{"$match", bson.D{{}}}}
+		// groupStage := bson.D{{"$group", bson.D{
+		// 	{"_id", bson.D{{"_id", "null"}}}, 
+		// 	{"total_count", bson.D{{"$sum", 1}}}, 
+		// 	{"data", bson.D{{"$push", "$$ROOT"}}}}}}
+		// projectStage := bson.D{
+		// 	{"$project", bson.D{
+		// 		{"_id", 0},
+		// 		{"total_count", 1},
+		// 		{"user_items", bson.D{{"$slice", []interface{}{"$data", startIndex, recordPerPage}}}},}}}
+		result,err := tournamentCollection.Find(ctx,  bson.M{})
 		defer cancel()
 		if err!=nil{
 			c.JSON(http.StatusOK, gin.H{"error":"error occured while listing tournaments", "hasError": true})
@@ -231,7 +230,7 @@ func GetTournaments() gin.HandlerFunc{
 		if err = result.All(ctx, &data); err!=nil{
 			log.Fatal(err)
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "tournaments":data[0], "hasError": false})}
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "tournaments":data, "hasError": false})}
 }
 
 func UpdateTournament() gin.HandlerFunc{
