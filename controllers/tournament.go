@@ -18,6 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var tournamentCollection *mongo.Collection = database.OpenCollection(database.Client, "tournament")
@@ -220,7 +221,9 @@ func GetTournaments() gin.HandlerFunc{
 		// 		{"_id", 0},
 		// 		{"total_count", 1},
 		// 		{"user_items", bson.D{{"$slice", []interface{}{"$data", startIndex, recordPerPage}}}},}}}
-		result,err := tournamentCollection.Find(ctx,  bson.M{})
+		myOptions := options.Find()
+		myOptions.SetSort(bson.M{"$natural":-1})
+		result,err := tournamentCollection.Find(ctx,  bson.M{}, myOptions)
 		defer cancel()
 		if err!=nil{
 			c.JSON(http.StatusOK, gin.H{"error":"error occured while listing tournaments", "hasError": true})
