@@ -19,7 +19,7 @@ func Authenticate() gin.HandlerFunc{
 
 		claims, err := helper.ValidateToken(clientToken)
 		if err !="" {
-			c.JSON(http.StatusOK, gin.H{"message":err})
+			c.JSON(http.StatusOK, gin.H{"message": "token expired"})
 			c.Abort()
 			return
 		}
