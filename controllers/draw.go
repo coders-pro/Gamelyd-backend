@@ -377,6 +377,7 @@ func AddTime() gin.HandlerFunc{
 func AddScore() gin.HandlerFunc{
 	return func(c *gin.Context){
 		id := c.Param("drawId")
+		var winner string = ""
 		type Score struct {
 			Team1 int		`json:"Team1" validate:"required"`
 			Team2 int		`json:"Team2" validate:"required"`
@@ -398,13 +399,18 @@ func AddScore() gin.HandlerFunc{
 			defer cancel()
 			return
 		}
-		fmt.Printf("%+v\n", ctx)
-		
+		if data.Team1 > data.Team2 {
+			winner = "Team1"
+		}else if data.Team2 > data.Team1 {
+			winner = "Team2"
+		}else {
+			winner = "Draw"
+		}
 
 		filter := bson.M{"drawid": id}
 
 		update := bson.M{
-			"$set": bson.M{"Team1Score": data.Team1 , "Team2Score": data.Team2},
+			"$set": bson.M{"Team1Score": data.Team1 , "Team2Score": data.Team2, "Winner": winner},
 		}
 
 		upsert := true
