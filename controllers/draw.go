@@ -29,7 +29,7 @@ func Draw() gin.HandlerFunc{
 		var draw models.Draw
 
 		if err := c.BindJSON(&draw); err != nil {
-			c.JSON(http.StatusOK, gin.H{"error": err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			defer cancel()
 			return
 		}
@@ -44,7 +44,7 @@ func Draw() gin.HandlerFunc{
 			participants, err := registerTournamentCollection.Find(ctx, bson.M{"tournamentid": draw.TournamentId})
 			defer cancel()
 			if err != nil{
-				c.JSON(http.StatusOK, gin.H{"error": err.Error(), "hasError": true})
+				c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 				defer cancel()
 				return
 			}
@@ -53,7 +53,7 @@ func Draw() gin.HandlerFunc{
 			var fil []models.RegisterTournament
 
 			if err := participants.All(ctx, &fil); err != nil {
-				c.JSON(http.StatusOK, gin.H{"error": err.Error(), "hasError": true})
+				c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 				return
 			}
 
@@ -124,7 +124,7 @@ func Draw() gin.HandlerFunc{
 		
 			resultInsertionNumber, insertErr := drawCollection.InsertMany(ctx, allData)
 			if insertErr !=nil {
-				c.JSON(http.StatusOK, gin.H{"error":  insertErr, "hasError": true})
+				c.JSON(http.StatusOK, gin.H{"message":  insertErr, "hasError": true})
 				defer cancel()
 				return
 			}
@@ -139,7 +139,7 @@ func Draw() gin.HandlerFunc{
 			returnDraw, err := drawCollection.Find(ctx, bson.M{"stage": draw.Stage - 1, "tournamentid": draw.TournamentId})
 			defer cancel()
 			if err != nil{
-				c.JSON(http.StatusOK, gin.H{"error": err.Error(), "hasError": true})
+				c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 				defer cancel()
 				return
 			}
@@ -150,7 +150,7 @@ func Draw() gin.HandlerFunc{
 			var request2 models.Draw
 			var submitData []models.Draw
 			if err = returnDraw.All(ctx, &fil); err != nil {
-				c.JSON(http.StatusOK, gin.H{"error": err.Error(), "hasError": true})
+				c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 				defer cancel()
 				return
 			}
@@ -231,7 +231,7 @@ func Draw() gin.HandlerFunc{
 
 		resultInsertionNumber, insertErr := drawCollection.InsertMany(ctx, newAll)
 			if insertErr !=nil {
-				c.JSON(http.StatusOK, gin.H{"error":  insertErr.Error(), "hasError": true})
+				c.JSON(http.StatusOK, gin.H{"message":  insertErr.Error(), "hasError": true})
 				defer cancel()
 				return
 			}
@@ -256,7 +256,7 @@ func GetDrawByTornamentID() gin.HandlerFunc{
 		returnDraw, err := drawCollection.Find(ctx, bson.M{"tournamentid": id})
 		defer cancel()
 		if err != nil{
-			c.JSON(http.StatusOK, gin.H{"error": err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			defer cancel()
 			return
 		}
@@ -264,7 +264,7 @@ func GetDrawByTornamentID() gin.HandlerFunc{
 		var fil []bson.M
 
 		if err = returnDraw.All(ctx, &fil); err != nil {
-			c.JSON(http.StatusOK, gin.H{"error": err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			defer cancel()
 			return
 		}
@@ -285,14 +285,14 @@ func AddWinner() gin.HandlerFunc{
 		defer cancel()
 
 		if err := c.BindJSON(&winner); err != nil {
-			c.JSON(http.StatusOK, gin.H{"error":err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
 			defer cancel()
 			return
 		}
 		
 		validationErr := validate.Struct(winner)
 		if validationErr != nil {
-			c.JSON(http.StatusOK, gin.H{"error":validationErr.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":validationErr.Error(), "hasError": true})
 			defer cancel()
 			return
 		}
@@ -314,7 +314,7 @@ func AddWinner() gin.HandlerFunc{
 
 		result := drawCollection.FindOneAndUpdate(ctx, filter, update, &opt)
 		if result.Err() != nil {
-			c.JSON(http.StatusOK, gin.H{"error":validationErr.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":validationErr.Error(), "hasError": true})
 			defer cancel()
 			return
 		}
@@ -336,14 +336,14 @@ func AddTime() gin.HandlerFunc{
 		defer cancel()
 
 		if err := c.BindJSON(&data); err != nil {
-			c.JSON(http.StatusOK, gin.H{"error":err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
 			defer cancel()
 			return
 		}
 		
 		validationErr := validate.Struct(data)
 		if validationErr != nil {
-			c.JSON(http.StatusOK, gin.H{"error":validationErr.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":validationErr.Error(), "hasError": true})
 			defer cancel()
 			return
 		}
@@ -365,7 +365,7 @@ func AddTime() gin.HandlerFunc{
 
 		result := drawCollection.FindOneAndUpdate(ctx, filter, update, &opt)
 		if result.Err() != nil {
-			c.JSON(http.StatusOK, gin.H{"error":validationErr.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":validationErr.Error(), "hasError": true})
 			defer cancel()
 			return
 		}
@@ -387,14 +387,14 @@ func AddScore() gin.HandlerFunc{
 		defer cancel()
 
 		if err := c.BindJSON(&data); err != nil {
-			c.JSON(http.StatusOK, gin.H{"error":err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
 			defer cancel()
 			return
 		}
 		
 		validationErr := validate.Struct(data)
 		if validationErr != nil {
-			c.JSON(http.StatusOK, gin.H{"error":validationErr.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":validationErr.Error(), "hasError": true})
 			defer cancel()
 			return
 		}
@@ -416,7 +416,7 @@ func AddScore() gin.HandlerFunc{
 
 		result := drawCollection.FindOneAndUpdate(ctx, filter, update, &opt)
 		if result.Err() != nil {
-			c.JSON(http.StatusOK, gin.H{"error":validationErr.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":validationErr.Error(), "hasError": true})
 			defer cancel()
 			return
 		}

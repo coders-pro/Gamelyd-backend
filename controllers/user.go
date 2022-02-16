@@ -50,7 +50,7 @@ func Signup()gin.HandlerFunc{
 		var user models.User
 
 		if err := c.BindJSON(&user); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "hasError": true})
+			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "hasError": true})
 			defer cancel()
 			return
 			
@@ -69,7 +69,7 @@ func Signup()gin.HandlerFunc{
 
 		validationErr := validate.Struct(user)
 		if validationErr != nil {
-			c.JSON(http.StatusOK, gin.H{"error":validationErr.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":validationErr.Error(), "hasError": true})
 			defer cancel()
 			return
 		}
@@ -79,7 +79,7 @@ func Signup()gin.HandlerFunc{
 		defer cancel()
 		if err != nil {
 			log.Panic(err)
-			c.JSON(http.StatusOK, gin.H{"error":"error occured while checking for the email", "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":"error occured while checking for the email", "hasError": true})
 			return
 		}
 
@@ -90,7 +90,7 @@ func Signup()gin.HandlerFunc{
 		defer cancel()
 		if err!= nil {
 			log.Panic(err)
-			c.JSON(http.StatusOK, gin.H{"error":"error occured while checking for the phone number", "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":"error occured while checking for the phone number", "hasError": true})
 			return
 		}
 
@@ -98,24 +98,24 @@ func Signup()gin.HandlerFunc{
 		defer cancel()
 		if err != nil {
 			log.Panic(err)
-			c.JSON(http.StatusOK, gin.H{"error":"error occured while checking for the user name", "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":"error occured while checking for the user name", "hasError": true})
 			return
 		}
 
 		if countName > 0{
-			c.JSON(http.StatusOK, gin.H{"error":"user name already exists", "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":"user name already exists", "hasError": true})
 			return
 		}
 
 		if count >0{
-			c.JSON(http.StatusOK, gin.H{"error":"this email or phone number already exists", "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":"this email or phone number already exists", "hasError": true})
 			return
 		}
 
 		resultInsertionNumber, insertErr := userCollection.InsertOne(ctx, user)
 		if insertErr !=nil {
 			msg := fmt.Sprintf("User item was not created")
-			c.JSON(http.StatusOK, gin.H{"error":msg, "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":msg, "hasError": true})
 			return
 		}
 		defer cancel()
@@ -131,26 +131,26 @@ func Login() gin.HandlerFunc{
 		var foundUser models.User
 
 		if err := c.BindJSON(&user); err != nil {
-			c.JSON(http.StatusOK, gin.H{"error":err.Error()})
+			c.JSON(http.StatusOK, gin.H{"message":err.Error()})
 			return 
 		}
 
 		err := userCollection.FindOne(ctx, bson.M{"email":user.Email}).Decode(&foundUser)
 		defer cancel()
 		if err != nil {
-			c.JSON(http.StatusOK, gin.H{"error":"email or password is incorrect", "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":"email or password is incorrect", "hasError": true})
 			return
 		}
 
 		passwordIsValid, msg := VerifyPassword(*user.Password, *foundUser.Password)
 		defer cancel()
 		if passwordIsValid != true{
-			c.JSON(http.StatusOK, gin.H{"error": msg, "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message": msg, "hasError": true})
 			return
 		}
 
 		if foundUser.Email == nil{
-			c.JSON(http.StatusOK, gin.H{"error":"user not found", "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":"user not found", "hasError": true})
 			return
 		}
 		token, refreshToken, _ := helper.GenerateAllTokens(*foundUser.Email, *foundUser.First_name, *foundUser.Last_name, *foundUser.User_type, foundUser.User_id)
@@ -158,7 +158,7 @@ func Login() gin.HandlerFunc{
 		err = userCollection.FindOne(ctx, bson.M{"user_id":foundUser.User_id}).Decode(&foundUser)
 
 		if err != nil {
-			c.JSON(http.StatusOK, gin.H{"error": err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data":foundUser, "hasError": false})
@@ -192,7 +192,7 @@ func CheckUserName() gin.HandlerFunc{
 func GetUsers() gin.HandlerFunc{
 	return func(c *gin.Context){
 		if err := helper.CheckUserType(c, "ADMIN"); err != nil {
-			c.JSON(http.StatusOK, gin.H{"error":err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
 			return
 		}
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
@@ -223,7 +223,7 @@ result,err := userCollection.Aggregate(ctx, mongo.Pipeline{
 	matchStage, groupStage, projectStage})
 defer cancel()
 if err!=nil{
-	c.JSON(http.StatusOK, gin.H{"error":"error occured while listing user items", "hasError": true})
+	c.JSON(http.StatusOK, gin.H{"message":"error occured while listing user items", "hasError": true})
 	return
 }
 var allusers []bson.M
@@ -237,7 +237,7 @@ func GetUser() gin.HandlerFunc{
 		userId := c.Param("user_id")
 
 		if err := helper.MatchUserTypeToUid(c, userId); err != nil {
-			c.JSON(http.StatusOK, gin.H{"error":err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
 			return
 		}
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
@@ -246,7 +246,7 @@ func GetUser() gin.HandlerFunc{
 		err := userCollection.FindOne(ctx, bson.M{"user_id":userId}).Decode(&user)
 		defer cancel()
 		if err != nil{
-			c.JSON(http.StatusOK, gin.H{"error": err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "user":user, "hasError": false})

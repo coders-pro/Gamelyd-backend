@@ -30,7 +30,7 @@ func SaveTournament() gin.HandlerFunc{
 		var tournament models.Tournament
 
 		if err := c.BindJSON(&tournament); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "hasError": true})
+			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "hasError": true})
 			defer cancel()
 			return
 		}
@@ -50,7 +50,7 @@ func SaveTournament() gin.HandlerFunc{
 
 		validationErr := validate.Struct(tournament)
 		if validationErr != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error":validationErr.Error(), "hasError": true})
+			c.JSON(http.StatusBadRequest, gin.H{"message":validationErr.Error(), "hasError": true})
 			defer cancel()
 			return
 		}
@@ -58,7 +58,7 @@ func SaveTournament() gin.HandlerFunc{
 		resultInsertionNumber, insertErr := tournamentCollection.InsertOne(ctx, tournament)
 		if insertErr !=nil {
 			msg := "item was not created"
-			c.JSON(http.StatusOK, gin.H{"error":msg, "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":msg, "hasError": true})
 			defer cancel()
 			return
 		}
@@ -75,7 +75,7 @@ func RegisterTournament()gin.HandlerFunc{
 		var registerTournament models.RegisterTournament
 
 		if err := c.BindJSON(&registerTournament); err != nil {
-			c.JSON(http.StatusOK, gin.H{"error": err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			defer cancel()
 			return
 		}
@@ -90,19 +90,19 @@ func RegisterTournament()gin.HandlerFunc{
 		// defer cancel()
 		// if err != nil {
 		// 	log.Panic(err)
-		// 	c.JSON(http.StatusInternalServerError, gin.H{"error":"error occured while checking for the user", "hasError": true})
+		// 	c.JSON(http.StatusInternalServerError, gin.H{"message":"error occured while checking for the user", "hasError": true})
 		// 	return
 		// }
 
 		// if count > 0 {
-		// 	c.JSON(http.StatusInternalServerError, gin.H{"error":"User already registered", "hasError": true})
+		// 	c.JSON(http.StatusInternalServerError, gin.H{"message":"User already registered", "hasError": true})
 		// 	return
 		// }
 
 
 		validationErr := validate.Struct(registerTournament)
 		if validationErr != nil {
-			c.JSON(http.StatusOK, gin.H{"error":validationErr.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":validationErr.Error(), "hasError": true})
 			defer cancel()
 			return
 		}
@@ -111,7 +111,7 @@ func RegisterTournament()gin.HandlerFunc{
 		resultInsertionNumber, insertErr := registerTournamentCollection.InsertOne(ctx, registerTournament)
 		if insertErr !=nil {
 			msg := "item was not created"
-			c.JSON(http.StatusOK, gin.H{"error":msg, "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":msg, "hasError": true})
 			defer cancel()
 			return
 		}
@@ -125,7 +125,7 @@ func GetTournament() gin.HandlerFunc{
 		// log.Fatal(id)
 
 		// if err := helper.MatchUserTypeToUid(c, id); err != nil {
-		// 	c.JSON(http.StatusOK, gin.H{"error":err.Error(), "hasError": true})
+		// 	c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
 		// 	return
 		// }
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
@@ -134,7 +134,7 @@ func GetTournament() gin.HandlerFunc{
 		err := tournamentCollection.FindOne(ctx, bson.M{"tournamentid":id}).Decode(&tournament)
 		defer cancel()
 		if err != nil{
-			c.JSON(http.StatusOK, gin.H{"error": err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "tournament":tournament, "hasError": false})
@@ -150,7 +150,7 @@ func ListPartTournament() gin.HandlerFunc{
 		returnTournament, err := registerTournamentCollection.Find(ctx, bson.M{"tournamentid": id})
 		defer cancel()
 		if err != nil{
-			c.JSON(http.StatusOK, gin.H{"error": err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			defer cancel()
 			return
 		}
@@ -158,7 +158,7 @@ func ListPartTournament() gin.HandlerFunc{
 		var fil []bson.M
 
 		if err = returnTournament.All(ctx, &fil); err != nil {
-			c.JSON(http.StatusOK, gin.H{"error": err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			defer cancel()
 			return
 		}
@@ -176,14 +176,14 @@ func ListUserTournament() gin.HandlerFunc{
 		returnTournament, err := registerTournamentCollection.Find(ctx, bson.M{"user_id": id})
 		defer cancel()
 		if err != nil{
-			c.JSON(http.StatusOK, gin.H{"error": err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
 
 		var fil []bson.M
 
 		if err = returnTournament.All(ctx, &fil); err != nil {
-			c.JSON(http.StatusOK, gin.H{"error": err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
 		
@@ -193,10 +193,6 @@ func ListUserTournament() gin.HandlerFunc{
 
 func GetTournaments() gin.HandlerFunc{
 	return func(c *gin.Context){
-		// if err := helper.CheckUserType(c, "ADMIN"); err != nil {
-		// 	c.JSON(http.StatusBadRequest, gin.H{"error":err.Error()})
-		// 	return
-		// }
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		
 		recordPerPage, err := strconv.Atoi(c.Query("recordPerPage"))
@@ -207,26 +203,40 @@ func GetTournaments() gin.HandlerFunc{
 		if err1 !=nil || page<1{
 			page = 1
 		}
-
-		// startIndex := (page - 1) * recordPerPage
-		// startIndex, err = strconv.Atoi(c.Query("startIndex"))
-
-		// matchStage := bson.D{{"$match", bson.D{{}}}}
-		// groupStage := bson.D{{"$group", bson.D{
-		// 	{"_id", bson.D{{"_id", "null"}}}, 
-		// 	{"total_count", bson.D{{"$sum", 1}}}, 
-		// 	{"data", bson.D{{"$push", "$$ROOT"}}}}}}
-		// projectStage := bson.D{
-		// 	{"$project", bson.D{
-		// 		{"_id", 0},
-		// 		{"total_count", 1},
-		// 		{"user_items", bson.D{{"$slice", []interface{}{"$data", startIndex, recordPerPage}}}},}}}
 		myOptions := options.Find()
 		myOptions.SetSort(bson.M{"$natural":-1})
 		result,err := tournamentCollection.Find(ctx,  bson.M{}, myOptions)
 		defer cancel()
 		if err!=nil{
-			c.JSON(http.StatusOK, gin.H{"error":"error occured while listing tournaments", "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":"error occured while listing tournaments", "hasError": true})
+			return
+		}
+		var data []bson.M
+		if err = result.All(ctx, &data); err!=nil{
+			log.Fatal(err)
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "tournaments":data, "hasError": false})}
+}
+
+func GetTournamentsByMode() gin.HandlerFunc{
+	return func(c *gin.Context){
+		payment := c.Param("paymentMode")
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		
+		recordPerPage, err := strconv.Atoi(c.Query("recordPerPage"))
+		if err != nil || recordPerPage <1{
+			recordPerPage = 10
+		}
+		page, err1 := strconv.Atoi(c.Query("page"))
+		if err1 !=nil || page<1{
+			page = 1
+		}
+		myOptions := options.Find()
+		myOptions.SetSort(bson.M{"$natural":-1})
+		result,err := tournamentCollection.Find(ctx,  bson.M{"payment": payment}, myOptions)
+		defer cancel()
+		if err!=nil{
+			c.JSON(http.StatusOK, gin.H{"message":"error occured while listing tournaments", "hasError": true})
 			return
 		}
 		var data []bson.M
@@ -243,12 +253,12 @@ func UpdateTournament() gin.HandlerFunc{
 
 		var tournament models.Tournament
 		if err := c.BindJSON(&tournament); err != nil {
-			c.JSON(http.StatusOK, gin.H{"error": err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
 
 		if err := helper.MatchUserIdToUid(c, tournament.User_id); err != nil {
-			c.JSON(http.StatusOK, gin.H{"error":err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
 			return
 		}
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
@@ -259,7 +269,7 @@ func UpdateTournament() gin.HandlerFunc{
 		value, err := tournamentCollection.UpdateOne(ctx, filter, set)
 		defer cancel()
 		if err != nil{
-			c.JSON(http.StatusOK, gin.H{"error": err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data": value, "tournament":id, "hasError": false})
@@ -277,7 +287,7 @@ func DeleteTournament() gin.HandlerFunc{
 		err := tournamentCollection.FindOne(ctx, bson.M{"tournamentid":id}).Decode(&tournament)
 		defer cancel()
 		if err != nil{
-			c.JSON(http.StatusOK, gin.H{"error": err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
 		sentValue := false
@@ -294,7 +304,7 @@ func DeleteTournament() gin.HandlerFunc{
 		value, err := tournamentCollection.UpdateOne(ctx, filter, set)
 		defer cancel()
 		if err != nil{
-			c.JSON(http.StatusOK, gin.H{"error": err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data": value, "tournament":id, "hasError": false})
@@ -313,7 +323,7 @@ func SuspendTournament() gin.HandlerFunc{
 		err := tournamentCollection.FindOne(ctx, bson.M{"tournamentid":id}).Decode(&tournament)
 		defer cancel()
 		if err != nil{
-			c.JSON(http.StatusOK, gin.H{"error": err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
 		sentValue := false
