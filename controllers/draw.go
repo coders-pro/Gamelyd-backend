@@ -378,8 +378,8 @@ func AddScore() gin.HandlerFunc{
 	return func(c *gin.Context){
 		id := c.Param("drawId")
 		type Score struct {
-			Team1 	int			`json:"Team1" validate:"required"`
-			Team2 	int			`json:"Team2" validate:"required"`
+			Team1 	interface{}			`json:"Team1" validate:"required"`
+			Team2 	interface{}			`json:"Team2" validate:"required"`
 			Winner 	string		`json:"Winner" validate:"required"`
 		}
 		var data Score
