@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/Gameware/database"
@@ -18,6 +17,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var userCollection *mongo.Collection = database.OpenCollection(database.Client, "user")
@@ -197,40 +197,21 @@ func GetUsers() gin.HandlerFunc{
 		}
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		
-		recordPerPage, err := strconv.Atoi(c.Query("recordPerPage"))
-		if err != nil || recordPerPage <1{
-			recordPerPage = 10
+		myOptions := options.Find()
+		myOptions.SetSort(bson.M{"$natural":-1})
+		result,err := userCollection.Find(ctx,  bson.M{}, myOptions)
+		
+		defer cancel()
+		if err!=nil{
+			c.JSON(http.StatusOK, gin.H{"message":"error occured while listing user items", "hasError": true})
+			return
 		}
-		page, err1 := strconv.Atoi(c.Query("page"))
-		if err1 !=nil || page<1{
-			page = 1
+		var allusers []bson.M
+		if err = result.All(ctx, &allusers); err!=nil{
+			log.Fatal(err)
 		}
-
-		startIndex := (page - 1) * recordPerPage
-		startIndex, err = strconv.Atoi(c.Query("startIndex"))
-
-		matchStage := bson.D{{"$match", bson.D{{}}}}
-		groupStage := bson.D{{"$group", bson.D{
-			{"_id", bson.D{{"_id", "null"}}}, 
-			{"total_count", bson.D{{"$sum", 1}}}, 
-			{"data", bson.D{{"$push", "$$ROOT"}}}}}}
-		projectStage := bson.D{
-			{"$project", bson.D{
-				{"_id", 0},
-				{"total_count", 1},
-				{"user_items", bson.D{{"$slice", []interface{}{"$data", startIndex, recordPerPage}}}},}}}
-result,err := userCollection.Aggregate(ctx, mongo.Pipeline{
-	matchStage, groupStage, projectStage})
-defer cancel()
-if err!=nil{
-	c.JSON(http.StatusOK, gin.H{"message":"error occured while listing user items", "hasError": true})
-	return
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "users":allusers, "hasError": false})}
 }
-var allusers []bson.M
-if err = result.All(ctx, &allusers); err!=nil{
-	log.Fatal(err)
-}
-c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "users":allusers[0], "hasError": false})}}
 
 func GetUser() gin.HandlerFunc{
 	return func(c *gin.Context){
