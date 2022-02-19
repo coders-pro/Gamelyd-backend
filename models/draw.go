@@ -30,6 +30,7 @@ type Draw struct{
 	Date					string					`json:"Date"`
 	Team1Score				int						`json:"Team1Score"`
 	Team2Score				int						`json:"Team2Score"`
+	Link					string					`json:"Link"`
 
 }
 

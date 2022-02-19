@@ -13,4 +13,5 @@ func DrawRoutes(incomingRoutes *gin.Engine){
 	incomingRoutes.POST("/draws/addWinner/:drawId", controller.AddWinner())
 	incomingRoutes.POST("/draws/addTime/:drawId", controller.AddTime())
 	incomingRoutes.POST("/draws/addScore/:drawId", controller.AddScore())
+	incomingRoutes.POST("/draws/addLink/:drawId", controller.AddLink())
 }

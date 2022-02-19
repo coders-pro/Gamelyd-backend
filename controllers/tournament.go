@@ -106,6 +106,22 @@ func RegisterTournament()gin.HandlerFunc{
 			defer cancel()
 			return
 		}
+
+		var tournament models.Tournament
+		err := tournamentCollection.FindOne(ctx, bson.M{"tournamentid":tournamentId}).Decode(&tournament)
+		defer cancel()
+		if err != nil{
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+			return
+		}
+
+		if tournament.Start == true {
+			if err != nil{
+				c.JSON(http.StatusOK, gin.H{"message": "Tournament Start, registration not allowed", "hasError": true})
+				return
+			}
+		}
+
 		
 
 		resultInsertionNumber, insertErr := registerTournamentCollection.InsertOne(ctx, registerTournament)

@@ -130,6 +130,11 @@ func Draw() gin.HandlerFunc{
 			}
 			// fmt.Printf("%v", resultInsertionNumber)
 			// fmt.Printf("%+v\n", insertErr)
+			filter := bson.M{"ID": draw.TournamentId}
+			set := bson.M{"$set": bson.M{"Start": true}}
+			value, err := tournamentCollection.UpdateOne(ctx, filter, set)
+			defer cancel()
+			fmt.Print(value)
 			
 			
 			c.JSON(http.StatusOK, gin.H{"message": "request processed successfull", "data": allData, "hasError": false, "insertIds": resultInsertionNumber})
@@ -235,6 +240,11 @@ func Draw() gin.HandlerFunc{
 				defer cancel()
 				return
 			}
+			filter := bson.M{"ID": draw.TournamentId}
+			set := bson.M{"$set": bson.M{"Start": true}}
+			value, err := tournamentCollection.UpdateOne(ctx, filter, set)
+			defer cancel()
+			fmt.Print(value)
 	
 	c.JSON(http.StatusOK, gin.H{"message": "request processed successfull", "hasError": false, "data": newAll, "insertId": resultInsertionNumber})
 	defer cancel()
@@ -404,6 +414,54 @@ func AddScore() gin.HandlerFunc{
 
 		update := bson.M{
 			"$set": bson.M{"Team1Score": data.Team1 , "Team2Score": data.Team2, "Winner": data.Winner},
+		}
+
+		upsert := true
+		after := options.After
+		opt := options.FindOneAndUpdateOptions{
+			ReturnDocument: &after,
+			Upsert:         &upsert,
+		}
+
+		result := drawCollection.FindOneAndUpdate(ctx, filter, update, &opt)
+		if result.Err() != nil {
+			c.JSON(http.StatusOK, gin.H{"message":validationErr.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+		
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "draws":result, "hasError": false})
+	}
+}
+
+func AddLink() gin.HandlerFunc{
+	return func(c *gin.Context){
+		id := c.Param("drawId")
+		type Link struct {
+			Link 	interface{}			`json:"Team1" validate:"required"`
+		}
+		var data Link
+		
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+
+		if err := c.BindJSON(&data); err != nil {
+			c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+		
+		validationErr := validate.Struct(data)
+		if validationErr != nil {
+			c.JSON(http.StatusOK, gin.H{"message":validationErr.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+
+		filter := bson.M{"drawid": id}
+
+		update := bson.M{
+			"$set": bson.M{"Link": data.Link},
 		}
 
 		upsert := true

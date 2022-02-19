@@ -191,10 +191,10 @@ func CheckUserName() gin.HandlerFunc{
 
 func GetUsers() gin.HandlerFunc{
 	return func(c *gin.Context){
-		if err := helper.CheckUserType(c, "ADMIN"); err != nil {
-			c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
-			return
-		}
+		// if err := helper.CheckUserType(c, "ADMIN"); err != nil {
+		// 	c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
+		// 	return
+		// }
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		
 		myOptions := options.Find()
@@ -225,6 +225,27 @@ func GetUser() gin.HandlerFunc{
 
 		var user models.User
 		err := userCollection.FindOne(ctx, bson.M{"user_id":userId}).Decode(&user)
+		defer cancel()
+		if err != nil{
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "user":user, "hasError": false})
+	}
+}
+
+func DeleteUser() gin.HandlerFunc{
+	return func(c *gin.Context){
+		userId := c.Param("user_id")
+
+		// if err := helper.MatchUserTypeToUid(c, userId); err != nil {
+		// 	c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
+		// 	return
+		// }
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+
+		var user models.User
+		err := userCollection.FindOneAndDelete(ctx, bson.M{"user_id":userId}).Decode(&user)
 		defer cancel()
 		if err != nil{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
