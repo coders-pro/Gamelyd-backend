@@ -438,7 +438,7 @@ func AddLink() gin.HandlerFunc{
 	return func(c *gin.Context){
 		id := c.Param("drawId")
 		type Link struct {
-			Link 	interface{}			`json:"Team1" validate:"required"`
+			Link 	string			`json:"Link" validate:"required"`
 		}
 		var data Link
 		
