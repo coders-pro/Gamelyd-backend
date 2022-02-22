@@ -18,6 +18,9 @@ type RegisterTournament struct{
 	Created_at				time.Time				`json:"Created_at" validate:"required"`
 	Updated_at				time.Time				`json:"Updated_at" validate:"required"`
 	TournamentId			string					`json:"TournamentId" validate:"required"`
+	TournamentName			string					`json:"TournamentName" validate:"required"`
+	TournamentIcon			string					`json:"TournamentIcon" validate:"required"`
+	TournamentDate			string					`json:"TournamentDate" validate:"required"`
 	RegisterTournamentId	string					`json:"RegisterTournamentId" validate:"required"`
 	TeamName				string					`json:"TeamName" validate:"required"`
 }

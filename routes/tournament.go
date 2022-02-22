@@ -17,5 +17,6 @@ func TournamentRoutes(incomingRoutes *gin.Engine){
 	incomingRoutes.GET("/tournament/participants/:id", controller.ListPartTournament())
 	incomingRoutes.POST("/tournament/register/:tournamentId", controller.RegisterTournament())
 	incomingRoutes.GET("/tournament/mode/:paymentMode", controller.GetTournamentsByMode())
+	incomingRoutes.GET("/tournament/userRegisteredTournaments/:username", controller.UserTournaments())
 
 }

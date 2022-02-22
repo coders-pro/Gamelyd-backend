@@ -23,6 +23,7 @@ import (
 var drawCollection *mongo.Collection = database.OpenCollection(database.Client, "draw")
 
 
+
 func Draw() gin.HandlerFunc{
 	return func(c *gin.Context){
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)

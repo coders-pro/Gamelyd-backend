@@ -26,7 +26,7 @@ type Tournament struct{
 	IsSuspended					bool					`json:"IsSuspended"`
 	Start						bool					`json:"Start"`
 	Link						string					`json:"Link"`
-	Date						string					`json:"Date"`
+	Date						string					`json:"Date" validate:"required"`
 	IsPaid						bool					`json:"IsPaid"`
 	RefNumber					string					`json:"RefNumber"`
 	PaymentChannel				string					`json:"PaymentChannel"`
