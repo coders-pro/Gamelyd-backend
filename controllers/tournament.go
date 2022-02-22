@@ -129,18 +129,38 @@ func RegisterTournament()gin.HandlerFunc{
 			return
 		}
 
-
-		for j := range registerTournament.Players {
-			result, err := registerTournamentCollection.CountDocuments(ctx,  bson.M{"TournamentId": registerTournament.TournamentId ,"players.username":registerTournament.Players[j].UserName})
-		
+		returnTournament, err := registerTournamentCollection.Find(ctx, bson.M{"tournamentid": tournament.TournamentId})
+		defer cancel()
+		if err != nil{
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			defer cancel()
-			if err!=nil{
-				c.JSON(http.StatusOK, gin.H{"message":"error occured while checking if users are registered", "hasError": true})
-				return
+			return
+		}
+
+		var fil []models.RegisterTournament
+
+		if err = returnTournament.All(ctx, &fil); err != nil {
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+
+		var newData []string
+
+		for i := range fil {
+			for j := range fil[i].Players {
+				newData = append(newData, fil[i].Players[j].UserName)
 			}
-			if result  > 0 {
-				c.JSON(http.StatusOK, gin.H{"message": "@" + registerTournament.Players[j].UserName + " " + "already registered for this tournament", "user": result, "hasError": true})
-				return
+		}
+
+		for i := range newData {
+			for j := range registerTournament.Players {
+				if newData[i] == registerTournament.Players[j].UserName {
+					msg := "@" + registerTournament.Players[j].UserName + " " + "has already registered for this tournament"
+					c.JSON(http.StatusOK, gin.H{"message":msg, "hasError": true})
+					defer cancel()
+					return
+				}
 			}
 		}
 
@@ -152,7 +172,7 @@ func RegisterTournament()gin.HandlerFunc{
 			return
 		}
 		defer cancel()
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data":registerTournament,  "hasError": false, "insertId": resultInsertionNumber})
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data":registerTournament, "hasError": false, "insertId": resultInsertionNumber})
 	}
 }
 func GetTournament() gin.HandlerFunc{
