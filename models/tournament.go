@@ -30,4 +30,5 @@ type Tournament struct{
 	IsPaid			bool					`json:"IsPaid"`
 	RefNumber		string					`json:"RefNumber"`
 	PaymentChannel	string					`json:"PaymentChannel"`
+	Amount			int						`json:"Amount"`
 }
