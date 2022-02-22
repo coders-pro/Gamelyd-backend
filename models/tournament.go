@@ -10,7 +10,7 @@ type Tournament struct{
 	ID				primitive.ObjectID		`bson:"_id" validate:"required"`
 	Name			*string					`json:"Name" validate:"required,min=2,max=100"`
 	GameName		*string					`json:"GameName" validate:"required,min=2,max=100"`
-	Icon			*string					`json:"icon" validate:"required,min=2,max=100"`
+	Icon			*string					`json:"icon" validate:"required,min=1,max=100"`
 	TournamentType	*string					`json:"TournamentType" validate:"required,eq=PUBLIC|eq=PRIVATE"`
 	Payment			*string					`json:"Payment" validate:"required,eq=FREE|eq=PAID|eq=SPONSORED"`
 	TournamentMode	*string					`json:"TournamentMode" validate:"required,eq=MULTIPLAYER|eq=BATTLEROYALE"`

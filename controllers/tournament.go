@@ -50,7 +50,7 @@ func SaveTournament() gin.HandlerFunc{
 
 		validationErr := validate.Struct(tournament)
 		if validationErr != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"message":validationErr.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":validationErr.Error(), "hasError": true})
 			defer cancel()
 			return
 		}
