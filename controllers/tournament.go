@@ -131,7 +131,7 @@ func RegisterTournament()gin.HandlerFunc{
 
 
 		for j := range registerTournament.Players {
-			result, err := registerTournamentCollection.CountDocuments(ctx,  bson.M{"players.username":registerTournament.Players[j].UserName})
+			result, err := registerTournamentCollection.CountDocuments(ctx,  bson.M{"TournamentId": registerTournament.TournamentId ,"players.username":registerTournament.Players[j].UserName})
 		
 			defer cancel()
 			if err!=nil{
