@@ -203,7 +203,10 @@ func ListPartTournament() gin.HandlerFunc{
 		
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
-		returnTournament, err := registerTournamentCollection.Find(ctx, bson.M{"tournamentid": id})
+		myOptions := options.Find()
+		myOptions.SetSort(bson.M{"$natural":-1})
+
+		returnTournament, err := registerTournamentCollection.Find(ctx, bson.M{"tournamentid": id}, myOptions)
 		defer cancel()
 		if err != nil{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
@@ -228,8 +231,10 @@ func ListUserTournament() gin.HandlerFunc{
 		id := c.Param("id")
 		
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		myOptions := options.Find()
+		myOptions.SetSort(bson.M{"$natural":-1})
 
-		returnTournament, err := registerTournamentCollection.Find(ctx, bson.M{"user_id": id})
+		returnTournament, err := tournamentCollection.Find(ctx, bson.M{"user_id": id}, myOptions)
 		defer cancel()
 		if err != nil{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
