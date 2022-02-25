@@ -248,7 +248,7 @@ func ListUserTournament() gin.HandlerFunc{
 			return
 		}
 		
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "tournament":fil, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "tournaments":fil, "hasError": false})
 	}
 }
 
@@ -432,6 +432,6 @@ func UserTournaments() gin.HandlerFunc{
 		}
 
 
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "users":data, "hasError": false})}
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "tournaments":data, "hasError": false})}
 		
 }
