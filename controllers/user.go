@@ -258,7 +258,7 @@ func DeleteUser() gin.HandlerFunc{
 func UpdateUser() gin.HandlerFunc{
 	return func(c *gin.Context){
 		id := c.Param("user_id")
-		primID, _ :=primitive.ObjectIDFromHex(id)
+		// primID, _ :=primitive.ObjectIDFromHex(id)
 
 		var user models.User
 		if err := c.BindJSON(&user); err != nil {
@@ -307,7 +307,7 @@ func UpdateUser() gin.HandlerFunc{
 		
 
 
-		filter := bson.M{"ID": primID}
+		filter := bson.M{"user_id": id}
 		set := bson.M{"$set": bson.M{"First_name": user.First_name, "Last_name": user.Last_name, "User_name": user.User_name, "Email": user.Email, "Phone": user.Phone, "Twitter": user.Twitter, "Instagram": user.Instagram, "Facebook": user.Facebook, "Linkedin": user.Linkedin, "Country": user.Country, "Location": user.Location}}
 		value, err := userCollection.UpdateOne(ctx, filter, set)
 		defer cancel()
@@ -315,7 +315,7 @@ func UpdateUser() gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data": value, "user":id, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data": value, "user":user, "hasError": false})
 
 	}	
 }
