@@ -11,7 +11,7 @@ type User struct{
 	First_name		*string					`json:"first_name" validate:"required,min=2,max=100"`
 	Last_name		*string					`json:"last_name" validate:"required,min=2,max=100"`
 	User_name		*string					`json:"user_name" validate:"required"`
-	Password		*string					`json:"Password" validate:"required,min=6"`
+	Password		*string					`json:"Password" validate:"required,min=5"`
 	Email			*string					`json:"email" validate:"email,required"`
 	Phone			*string					`json:"phone" validate:"required"`
 	Token			*string					`json:"token"`
@@ -23,4 +23,15 @@ type User struct{
 	IsDeleted		bool					`json:"IsDeleted"`
 	IsSuspended		bool					`json:"IsSuspended"`
 	EmailVerified	bool					`json:"EmailVerified"`
+	Twitter			string					`json:"Twitter"`
+	Instagram		string					`json:"Instagram"`
+	Linkedin		string					`json:"Linkedin"`
+	Facebook		string					`json:"Facebook"`
+	Country			string					`json:"Country"`
+	Location		string				`json:"Location"`
+}
+
+type  ChangePassword struct {
+	Password		*string					`json:"Password" validate:"required,min=5"`
+	NewPassword	string						`json:"NewPassword" validate:"required"`
 }

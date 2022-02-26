@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
+	cor "github.com/Gameware/middleware"
 	routes "github.com/Gameware/routes"
-	// "github.com/Gameware/docs"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -25,10 +25,12 @@ func main(){
 
 	router := gin.New()
 	router.Use(gin.Logger())
+	router.Use(cor.CORSMiddleware())
 
 	routes.AuthRoutes(router)
 	routes.UserRoutes(router)
 	routes.TournamentRoutes(router)
+	routes.DrawRoutes(router)
 
 	
 	router.GET("/api-1", func(c *gin.Context){
