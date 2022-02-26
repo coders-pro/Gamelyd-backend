@@ -274,7 +274,9 @@ func UpdateUser() gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
-		if checkUser.User_name == user.User_name {
+		checkUserName := checkUser.User_name == user.User_name
+		checkEmail := checkUser.Email == user.Email
+		if checkUserName == false {
 			countName, err := userCollection.CountDocuments(ctx, bson.M{"user_name":user.User_name})
 			defer cancel()
 			if err != nil {
@@ -289,7 +291,7 @@ func UpdateUser() gin.HandlerFunc{
 			}
 		}
 
-		if checkUser.Email == user.Email {
+		if checkEmail == false {
 			countEmail, err := userCollection.CountDocuments(ctx, bson.M{"email":user.Email})
 			defer cancel()
 			if err != nil {
