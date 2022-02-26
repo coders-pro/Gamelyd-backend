@@ -254,3 +254,48 @@ func DeleteUser() gin.HandlerFunc{
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "user":user, "hasError": false})
 	}
 }
+
+func UpdateUser() gin.HandlerFunc{
+	return func(c *gin.Context){
+		id := c.Param("id")
+		primID, _ :=primitive.ObjectIDFromHex(id)
+
+		var user models.User
+		if err := c.BindJSON(&user); err != nil {
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+			return
+		}
+
+		if err := helper.MatchUserIdToUid(c, user.User_id); err != nil {
+			c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
+			return
+		}
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+
+
+		countName, err := userCollection.CountDocuments(ctx, bson.M{"user_name":user.User_name})
+		defer cancel()
+		if err != nil {
+			log.Panic(err)
+			c.JSON(http.StatusOK, gin.H{"message":"error occured while checking for the user name", "hasError": true})
+			return
+		}
+
+		if countName > 0{
+			c.JSON(http.StatusOK, gin.H{"message":"user name already exists", "hasError": true})
+			return
+		}
+
+
+		filter := bson.M{"ID": primID}
+		set := bson.M{"$set": bson.M{"First_name": user.First_name, "Last_name": user.Last_name, "User_name": user.User_name, "Email": user.Email, "Phone": user.Phone, "Twitter": user.Twitter, "Instagram": user.Instagram, "Facebook": user.Facebook, "Linkedin": user.Linkedin, "Country": user.Country, "Location": user.Location}}
+		value, err := userCollection.UpdateOne(ctx, filter, set)
+		defer cancel()
+		if err != nil{
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data": value, "tournament":id, "hasError": false})
+
+	}	
+}

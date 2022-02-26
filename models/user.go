@@ -23,4 +23,10 @@ type User struct{
 	IsDeleted		bool					`json:"IsDeleted"`
 	IsSuspended		bool					`json:"IsSuspended"`
 	EmailVerified	bool					`json:"EmailVerified"`
+	Twitter			string					`json:"Twitter"`
+	Instagram		string					`json:"Instagram"`
+	Linkedin		string					`json:"Linkedin"`
+	Facebook		string					`json:"Facebook"`
+	Country			string					`json:"Country"`
+	Location		string				`json:"Location"`
 }
