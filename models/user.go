@@ -30,3 +30,8 @@ type User struct{
 	Country			string					`json:"Country"`
 	Location		string				`json:"Location"`
 }
+
+type  ChangePassword struct {
+	Password		*string					`json:"Password" validate:"required,min=5"`
+	NewPassword	string						`json:"NewPassword" validate:"required"`
+}

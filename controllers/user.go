@@ -323,6 +323,47 @@ func UpdateUser() gin.HandlerFunc{
 
 	}	
 }
+
+
+func ChangePassword() gin.HandlerFunc{
+	return func(c *gin.Context){
+		id := c.Param("user_id")
+		var checkUser models.User
+		var user models.ChangePassword
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+
+
+		if err := c.BindJSON(&user); err != nil {
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+			return
+		}
+
+		err := userCollection.FindOne(ctx, bson.M{"user_id":id}).Decode(&checkUser)
+		defer cancel()
+		if err != nil{
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+			return
+		}
+
+		passwordIsValid, _ := VerifyPassword(*user.Password, *checkUser.Password)
+		defer cancel()
+		if passwordIsValid != true{
+			c.JSON(http.StatusOK, gin.H{"message": "Old password is incorrect", "hasError": true})
+			return
+		}
+
+		filter := bson.M{"user_id": id}
+		set := bson.M{"$set": bson.M{"Password": HashPassword(user.NewPassword)}}
+		value, err := userCollection.UpdateOne(ctx, filter, set)
+		defer cancel()
+		if err != nil{
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Password changed succesfully", "value": value, "hasError": false})
+	}
+}
+
 func Test() gin.HandlerFunc{
 	return func(c *gin.Context){
 		user1 := "mcbobby"
