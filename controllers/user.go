@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/Gameware/database"
@@ -274,9 +275,13 @@ func UpdateUser() gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
-		checkUserName := checkUser.User_name == user.User_name
-		checkEmail := checkUser.Email == user.Email
-		if checkUserName == false {
+		
+		checkUserName := strings.Compare(*checkUser.User_name, *user.User_name)
+		checkUserEmail := strings.Compare(*checkUser.Email, *user.Email)
+		fmt.Print(*checkUser.User_name)
+		fmt.Print(*user.User_name)
+		fmt.Print(strings.Compare(*checkUser.User_name, *user.User_name))
+		if checkUserName != 0 {
 			countName, err := userCollection.CountDocuments(ctx, bson.M{"user_name":user.User_name})
 			defer cancel()
 			if err != nil {
@@ -286,17 +291,17 @@ func UpdateUser() gin.HandlerFunc{
 			}
 
 			if countName > 0{
-				c.JSON(http.StatusOK, gin.H{"message":"user name already exists", "hasError": true})
+				c.JSON(http.StatusOK, gin.H{"message":"user name already exists", "hasError": checkUserName})
 				return
 			}
 		}
 
-		if checkEmail == false {
+		if checkUserEmail != 0 {
 			countEmail, err := userCollection.CountDocuments(ctx, bson.M{"email":user.Email})
 			defer cancel()
 			if err != nil {
 				log.Panic(err)
-				c.JSON(http.StatusOK, gin.H{"message":"error occured while checking for the user name", "hasError": true})
+				c.JSON(http.StatusOK, gin.H{"message":"error occured while checking for the user name", "hasError": checkUserName})
 				return
 			}
 
@@ -317,7 +322,25 @@ func UpdateUser() gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data": value, "user":user, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data": value, "user":user, "hasError": checkUserName})
 
 	}	
+}
+func Test() gin.HandlerFunc{
+	return func(c *gin.Context){
+		user1 := "mcbobby"
+		user2 := "mcbobby1"
+
+		if user1 != user2 {
+			c.JSON(http.StatusOK, gin.H{"message": "1 is not 2",  "hasError": false})
+			return
+		}
+
+		if user1 == user2 {
+			c.JSON(http.StatusOK, gin.H{"message": "1 is 2",  "hasError": false})
+			return
+		}
+		
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt",  "hasError": false})
+	}
 }
