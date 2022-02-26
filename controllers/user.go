@@ -278,9 +278,6 @@ func UpdateUser() gin.HandlerFunc{
 		
 		checkUserName := strings.Compare(*checkUser.User_name, *user.User_name)
 		checkUserEmail := strings.Compare(*checkUser.Email, *user.Email)
-		fmt.Print(*checkUser.User_name)
-		fmt.Print(*user.User_name)
-		fmt.Print(strings.Compare(*checkUser.User_name, *user.User_name))
 		if checkUserName != 0 {
 			countName, err := userCollection.CountDocuments(ctx, bson.M{"user_name":user.User_name})
 			defer cancel()
@@ -291,7 +288,7 @@ func UpdateUser() gin.HandlerFunc{
 			}
 
 			if countName > 0{
-				c.JSON(http.StatusOK, gin.H{"message":"user name already exists", "hasError": checkUserName})
+				c.JSON(http.StatusOK, gin.H{"message":"user name already exists", "hasError": true})
 				return
 			}
 		}
@@ -301,7 +298,7 @@ func UpdateUser() gin.HandlerFunc{
 			defer cancel()
 			if err != nil {
 				log.Panic(err)
-				c.JSON(http.StatusOK, gin.H{"message":"error occured while checking for the user name", "hasError": checkUserName})
+				c.JSON(http.StatusOK, gin.H{"message":"error occured while checking for the user name", "hasError": true})
 				return
 			}
 
@@ -322,7 +319,7 @@ func UpdateUser() gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data": value, "user":user, "hasError": checkUserName})
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data": value, "user":user, "hasError": false})
 
 	}	
 }
