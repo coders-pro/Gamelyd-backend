@@ -257,7 +257,7 @@ func DeleteUser() gin.HandlerFunc{
 
 func UpdateUser() gin.HandlerFunc{
 	return func(c *gin.Context){
-		id := c.Param("id")
+		id := c.Param("user_id")
 		primID, _ :=primitive.ObjectIDFromHex(id)
 
 		var user models.User
@@ -265,26 +265,46 @@ func UpdateUser() gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
-
-		if err := helper.MatchUserIdToUid(c, user.User_id); err != nil {
-			c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
-			return
-		}
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
-
-		countName, err := userCollection.CountDocuments(ctx, bson.M{"user_name":user.User_name})
+		var checkUser models.User
+		err := userCollection.FindOne(ctx, bson.M{"user_id":id}).Decode(&checkUser)
 		defer cancel()
-		if err != nil {
-			log.Panic(err)
-			c.JSON(http.StatusOK, gin.H{"message":"error occured while checking for the user name", "hasError": true})
+		if err != nil{
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
+		}
+		if checkUser.User_name == user.User_name {
+			countName, err := userCollection.CountDocuments(ctx, bson.M{"user_name":user.User_name})
+			defer cancel()
+			if err != nil {
+				log.Panic(err)
+				c.JSON(http.StatusOK, gin.H{"message":"error occured while checking for the user name", "hasError": true})
+				return
+			}
+
+			if countName > 0{
+				c.JSON(http.StatusOK, gin.H{"message":"user name already exists", "hasError": true})
+				return
+			}
 		}
 
-		if countName > 0{
-			c.JSON(http.StatusOK, gin.H{"message":"user name already exists", "hasError": true})
-			return
+		if checkUser.Email == user.Email {
+			countEmail, err := userCollection.CountDocuments(ctx, bson.M{"email":user.Email})
+			defer cancel()
+			if err != nil {
+				log.Panic(err)
+				c.JSON(http.StatusOK, gin.H{"message":"error occured while checking for the user name", "hasError": true})
+				return
+			}
+
+			if countEmail > 0{
+				c.JSON(http.StatusOK, gin.H{"message":"Email already exists", "hasError": true})
+				return
+			}
 		}
+
+		
 
 
 		filter := bson.M{"ID": primID}
@@ -295,7 +315,7 @@ func UpdateUser() gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data": value, "tournament":id, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data": value, "user":id, "hasError": false})
 
 	}	
 }
