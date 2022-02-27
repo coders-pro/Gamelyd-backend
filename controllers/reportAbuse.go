@@ -17,46 +17,46 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var contactCollection *mongo.Collection = database.OpenCollection(database.Client, "contact")
+var ReportAbuseCollection *mongo.Collection = database.OpenCollection(database.Client, "reportAbuse")
 
-func SaveContactUs() gin.HandlerFunc{
+func SaveReportAbuse() gin.HandlerFunc{
 	return func(c *gin.Context){
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
-		var contact models.ContactUs
+		var report models.ReportAbuse
 
-		contact.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-		contact.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-		contact.ID = primitive.NewObjectID()
-		contact.ContactId = contact.ID.Hex()
-		contact.Achived = false
-		contact.IsCompleted = false
-		contact.IsDeleted = false
+		report.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+		report.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+		report.ID = primitive.NewObjectID()
+		report.ReportAbuseId = report.ID.Hex()
+		report.Achived = false
+		report.IsCompleted = false
+		report.IsDeleted = false
 
-		if err := c.BindJSON(&contact); err != nil {
+		if err := c.BindJSON(&report); err != nil {
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			defer cancel()
 			return
 		}
 
-		validationErr := validate.Struct(contact)
+		validationErr := validate.Struct(report)
 		if validationErr != nil {
 			c.JSON(http.StatusOK, gin.H{"message":validationErr.Error(), "hasError": true})
 			defer cancel()
 			return
 		}
 
-		resultInsertionNumber, insertErr := contactCollection.InsertOne(ctx, contact)
+		resultInsertionNumber, insertErr := ReportAbuseCollection.InsertOne(ctx, report)
 		if insertErr !=nil {
 			c.JSON(http.StatusOK, gin.H{"message":"Error creating new entry ", "hasError": true})
 			defer cancel()
 			return
 		}
 		defer cancel()
-		c.JSON(http.StatusOK, gin.H{"message": "Successfull, we will get back to you soon", "data":contact, "hasError": false, "insertId": resultInsertionNumber})
+		c.JSON(http.StatusOK, gin.H{"message": "Hang on and relax we will take it from here", "data":report, "hasError": false, "insertId": resultInsertionNumber})
 	}
 }
 
-func GetAllContactUs() gin.HandlerFunc{
+func GetAllReportAbuse() gin.HandlerFunc{
 	return func(c *gin.Context){
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		
@@ -70,7 +70,7 @@ func GetAllContactUs() gin.HandlerFunc{
 		}
 		myOptions := options.Find()
 		myOptions.SetSort(bson.M{"$natural":-1})
-		result,err := contactCollection.Find(ctx,  bson.M{}, myOptions)
+		result,err := ReportAbuseCollection.Find(ctx,  bson.M{}, myOptions)
 		defer cancel()
 		if err!=nil{
 			c.JSON(http.StatusOK, gin.H{"message":"error occured while listing contacts", "hasError": true})
@@ -80,17 +80,17 @@ func GetAllContactUs() gin.HandlerFunc{
 		if err = result.All(ctx, &data); err!=nil{
 			log.Fatal(err)
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "contacts":data, "hasError": false})}
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "reports":data, "hasError": false})}
 }
 
-func DeleteContact() gin.HandlerFunc{
+func DeleteReportAbuse() gin.HandlerFunc{
 	return func(c *gin.Context){
 		id := c.Param("id")
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
-		var contact models.ContactUs
-		contact.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-		err := contactCollection.FindOne(ctx, bson.M{"contactid":id}).Decode(&contact)
+		var report models.ReportAbuse
+		report.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+		err := ReportAbuseCollection.FindOne(ctx, bson.M{"reportabuseid":id}).Decode(&report)
 		defer cancel()
 		if err != nil{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
@@ -98,16 +98,16 @@ func DeleteContact() gin.HandlerFunc{
 		}
 		sentValue := false
 
-		if contact.IsDeleted == true {
+		if report.IsDeleted == true {
 			sentValue = false
 		}else {
 			sentValue = true
 		}
 
 
-		filter := bson.M{"contactid": id}
-		set := bson.M{"$set": bson.M{"IsDeleted": sentValue, "isdeleted": sentValue}}
-		value, err := contactCollection.UpdateOne(ctx, filter, set)
+		filter := bson.M{"reportabuseid": id}
+		set := bson.M{"$set": bson.M{"isdeleted": sentValue, "IsDeleted": sentValue}}
+		value, err := ReportAbuseCollection.UpdateOne(ctx, filter, set)
 		defer cancel()
 		if err != nil{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
@@ -118,15 +118,15 @@ func DeleteContact() gin.HandlerFunc{
 	}	
 }
 
-func AchivedContact() gin.HandlerFunc{
+func AchivedReportAbuse() gin.HandlerFunc{
 	return func(c *gin.Context){
 		id := c.Param("id")
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
-		var contact models.ContactUs
+		var report models.ReportAbuse
 
-		contact.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-		err := contactCollection.FindOne(ctx, bson.M{"contactid":id}).Decode(&contact)
+		report.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+		err := ReportAbuseCollection.FindOne(ctx, bson.M{"reportabuseid":id}).Decode(&report)
 		defer cancel()
 		if err != nil{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
@@ -134,16 +134,16 @@ func AchivedContact() gin.HandlerFunc{
 		}
 		sentValue := false
 
-		if contact.Achived == true {
+		if report.Achived == true {
 			sentValue = false
 		}else {
 			sentValue = true
 		}
 
 
-		filter := bson.M{"contactid": id}
+		filter := bson.M{"reportabuseid": id}
 		set := bson.M{"$set": bson.M{"Achived": sentValue, "achived": sentValue}}
-		value, err := contactCollection.UpdateOne(ctx, filter, set)
+		value, err := ReportAbuseCollection.UpdateOne(ctx, filter, set)
 		defer cancel()
 		if err != nil{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
@@ -154,14 +154,14 @@ func AchivedContact() gin.HandlerFunc{
 	}	
 }
 
-func CompleteContact() gin.HandlerFunc{
+func CompleteReportAbuse() gin.HandlerFunc{
 	return func(c *gin.Context){
 		id := c.Param("id")
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
 		var contact models.ContactUs
 		contact.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-		err := contactCollection.FindOne(ctx, bson.M{"contactid":id}).Decode(&contact)
+		err := ReportAbuseCollection.FindOne(ctx, bson.M{"reportabuseid":id}).Decode(&contact)
 		defer cancel()
 		if err != nil{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
@@ -176,9 +176,9 @@ func CompleteContact() gin.HandlerFunc{
 		}
 
 
-		filter := bson.M{"contactid": id}
+		filter := bson.M{"reportabuseid": id}
 		set := bson.M{"$set": bson.M{"IsCompleted": sentValue, "iscompleted": sentValue}}
-		value, err := contactCollection.UpdateOne(ctx, filter, set)
+		value, err := ReportAbuseCollection.UpdateOne(ctx, filter, set)
 		defer cancel()
 		if err != nil{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
@@ -189,7 +189,7 @@ func CompleteContact() gin.HandlerFunc{
 	}	
 }
 
-func GetCompleteContact() gin.HandlerFunc{
+func GetCompleteReportAbuse() gin.HandlerFunc{
 	return func(c *gin.Context){
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		
@@ -203,7 +203,7 @@ func GetCompleteContact() gin.HandlerFunc{
 		}
 		myOptions := options.Find()
 		myOptions.SetSort(bson.M{"$natural":-1})
-		result,err := contactCollection.Find(ctx,  bson.M{"IsCompleted": true, "iscompleted": true}, myOptions)
+		result,err := ReportAbuseCollection.Find(ctx,  bson.M{"IsCompleted": true}, myOptions)
 		defer cancel()
 		if err!=nil{
 			c.JSON(http.StatusOK, gin.H{"message":"error occured while listing contacts", "hasError": true})
@@ -214,12 +214,12 @@ func GetCompleteContact() gin.HandlerFunc{
 			log.Fatal(err)
 		}
 		
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "contacts":data, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "reports":data, "hasError": false})
 
 	}	
 }
 
-func GetIsDeletedContact() gin.HandlerFunc{
+func GetIsDeletedReportAbuse() gin.HandlerFunc{
 	return func(c *gin.Context){
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		
@@ -233,36 +233,7 @@ func GetIsDeletedContact() gin.HandlerFunc{
 		}
 		myOptions := options.Find()
 		myOptions.SetSort(bson.M{"$natural":-1})
-		result,err := contactCollection.Find(ctx,  bson.M{"IsDeleted": true, "isdeleted": true}, myOptions)
-		defer cancel()
-		if err!=nil{
-			c.JSON(http.StatusOK, gin.H{"message":"error occured while listing contacts", "hasError": true})
-			return
-		}
-		var data []bson.M
-		if err = result.All(ctx, &data); err!=nil{
-			log.Fatal(err)
-		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "contacts":data, "hasError": false})
-
-	}	
-}
-
-func GetIsAchivedContact() gin.HandlerFunc{
-	return func(c *gin.Context){
-		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
-		
-		recordPerPage, err := strconv.Atoi(c.Query("recordPerPage"))
-		if err != nil || recordPerPage <1{
-			recordPerPage = 10
-		}
-		page, err1 := strconv.Atoi(c.Query("page"))
-		if err1 !=nil || page<1{
-			page = 1
-		}
-		myOptions := options.Find()
-		myOptions.SetSort(bson.M{"$natural":-1})
-		result,err := contactCollection.Find(ctx,  bson.M{"Achived": true, "achived": true}, myOptions)
+		result,err := ReportAbuseCollection.Find(ctx,  bson.M{"IsDeleted": true}, myOptions)
 		defer cancel()
 		if err!=nil{
 			c.JSON(http.StatusOK, gin.H{"message":"error occured while listing contacts", "hasError": true})
@@ -277,7 +248,7 @@ func GetIsAchivedContact() gin.HandlerFunc{
 	}	
 }
 
-func GetActiveContact() gin.HandlerFunc{
+func GetIsAchivedReportAbuse() gin.HandlerFunc{
 	return func(c *gin.Context){
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		
@@ -291,7 +262,36 @@ func GetActiveContact() gin.HandlerFunc{
 		}
 		myOptions := options.Find()
 		myOptions.SetSort(bson.M{"$natural":-1})
-		result,err := contactCollection.Find(ctx,  bson.M{"achived": false, "isdeleted": false, "iscompleted": false}, myOptions)
+		result,err := ReportAbuseCollection.Find(ctx,  bson.M{"Achived": true}, myOptions)
+		defer cancel()
+		if err!=nil{
+			c.JSON(http.StatusOK, gin.H{"message":"error occured while listing contacts", "hasError": true})
+			return
+		}
+		var data []bson.M
+		if err = result.All(ctx, &data); err!=nil{
+			log.Fatal(err)
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "contacts":data, "hasError": false})
+
+	}	
+}
+
+func GetActiveReportAbuse() gin.HandlerFunc{
+	return func(c *gin.Context){
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		
+		recordPerPage, err := strconv.Atoi(c.Query("recordPerPage"))
+		if err != nil || recordPerPage <1{
+			recordPerPage = 10
+		}
+		page, err1 := strconv.Atoi(c.Query("page"))
+		if err1 !=nil || page<1{
+			page = 1
+		}
+		myOptions := options.Find()
+		myOptions.SetSort(bson.M{"$natural":-1})
+		result,err := ReportAbuseCollection.Find(ctx,  bson.M{"achived": false, "isdeleted": false, "iscompleted": false}, myOptions)
 		defer cancel()
 		if err!=nil{
 			c.JSON(http.StatusOK, gin.H{"message":"error occured while listing contacts", "hasError": true})

@@ -353,7 +353,7 @@ func DeleteTournament() gin.HandlerFunc{
 		}
 		sentValue := false
 
-		if tournament.IsSuspended == true {
+		if tournament.IsDeleted == true {
 			sentValue = false
 		}else {
 			sentValue = true
