@@ -28,6 +28,9 @@ func SaveContactUs() gin.HandlerFunc{
 		contact.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		contact.ID = primitive.NewObjectID()
 		contact.ContactId = contact.ID.Hex()
+		contact.Achived = false
+		contact.IsCompleted = false
+		contact.IsDeleted = false
 
 		if err := c.BindJSON(&contact); err != nil {
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})

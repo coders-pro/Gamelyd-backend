@@ -15,6 +15,9 @@ type ContactUs struct{
 	Email					string					`json:"Email" validate:"required"`
 	Name					string					`json:"Name" validate:"required"`
 	Message					string					`json:"Message" validate:"required"`
+	Achived					bool					`json:"Achived"`
+	IsDeleted				bool					`json:"IsDeleted"`
+	IsCompleted				bool					`json:"IsCompleted"`
 }
 
 
