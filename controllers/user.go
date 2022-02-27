@@ -366,19 +366,29 @@ func ChangePassword() gin.HandlerFunc{
 
 func Test() gin.HandlerFunc{
 	return func(c *gin.Context){
-		user1 := "mcbobby"
-		user2 := "mcbobby1"
+		userId := c.Param("userId")
+		tournamentId := c.Param("tournamentId")
 
-		if user1 != user2 {
-			c.JSON(http.StatusOK, gin.H{"message": "1 is not 2",  "hasError": false})
-			return
-		}
-
-		if user1 == user2 {
-			c.JSON(http.StatusOK, gin.H{"message": "1 is 2",  "hasError": false})
-			return
-		}
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt",  "hasError": false})
+		
+		
+		result,err := registerTournamentCollection.Find(ctx,  bson.M{"players.user_id":userId, "tournamentid": tournamentId})
+		
+		defer cancel()
+		if err!=nil{
+			c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
+			return
+		}
+
+		var data []models.RegisterTournament
+		if err = result.All(ctx, &data); err!=nil{
+			c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
+			return
+		}
+
+		
+		
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt",  "hasError": data[0].Players})
 	}
 }

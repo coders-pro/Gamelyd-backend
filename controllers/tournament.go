@@ -435,3 +435,72 @@ func UserTournaments() gin.HandlerFunc{
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "tournaments":data, "hasError": false})}
 		
 }
+
+func RemoveUser() gin.HandlerFunc{
+	return func(c *gin.Context){
+		userId := c.Param("userId")
+		tournamentId := c.Param("tournamentId")
+
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		
+		
+		
+		result,err := registerTournamentCollection.Find(ctx,  bson.M{"players.user_id":userId, "tournamentid": tournamentId})
+		
+		defer cancel()
+		if err!=nil{
+			c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
+			return
+		}
+
+		var data []models.RegisterTournament
+		if err = result.All(ctx, &data); err!=nil{
+			c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
+			return
+		}
+
+		if data == nil {
+			c.JSON(http.StatusOK, gin.H{"message":"you have not registered for this tournament yet", "hasError": true})
+			return
+		}
+
+		var newData []models.Player
+		// c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": data})
+		// return
+
+		for i, _ := range data[0].Players {
+			if data[0].Players[i].User_id != userId {
+				newData = append(newData, data[0].Players[i])
+			}
+		}
+
+
+		if err!=nil{
+			c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+
+		if (newData == nil) {
+			err := registerTournamentCollection.FindOneAndDelete(ctx, bson.M{"registertournamentid":data[0].RegisterTournamentId}).Decode(&data[0])
+			defer cancel()
+			if err != nil{
+				c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+				return
+			}
+		}else {
+			// data[0].Players = newData
+			filter := bson.M{"registertournamentid":data[0].RegisterTournamentId}
+			set := bson.M{"$set": bson.M{"players": newData}}
+			_, err := registerTournamentCollection.UpdateOne(ctx, filter, set)
+
+			if err!=nil{
+				c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
+				defer cancel()
+				return
+			}
+
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "tournaments":newData, "hasError": false})}
+		
+}
