@@ -131,7 +131,7 @@ func Draw() gin.HandlerFunc{
 			}
 			// fmt.Printf("%v", resultInsertionNumber)
 			// fmt.Printf("%+v\n", insertErr)
-			filter := bson.M{"ID": draw.TournamentId}
+			filter := bson.M{"tournamentid": draw.TournamentId}
 			set := bson.M{"$set": bson.M{"Start": true}}
 			value, err := tournamentCollection.UpdateOne(ctx, filter, set)
 			defer cancel()
@@ -241,7 +241,7 @@ func Draw() gin.HandlerFunc{
 				defer cancel()
 				return
 			}
-			filter := bson.M{"ID": draw.TournamentId}
+			filter := bson.M{"tournamentid": draw.TournamentId}
 			set := bson.M{"$set": bson.M{"Start": true}}
 			value, err := tournamentCollection.UpdateOne(ctx, filter, set)
 			defer cancel()
@@ -254,6 +254,96 @@ func Draw() gin.HandlerFunc{
 		}
 	
 
+	}
+}
+
+
+
+func DrawBr() gin.HandlerFunc{
+	return func(c *gin.Context){
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var draw models.Draw
+
+		if err := c.BindJSON(&draw); err != nil {
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+
+		draw.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+		draw.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+		draw.ID = primitive.NewObjectID()
+		draw.DrawId = draw.ID.Hex()
+
+		returnDraw, err := drawCollection.Find(ctx, bson.M{"tournamentid": draw.TournamentId})
+		defer cancel()
+		if err != nil{
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+
+		var data []models.Draw
+
+		if err = returnDraw.All(ctx, &data); err != nil {
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+
+		if len(data[0].BRTeams) > 0 {
+			c.JSON(http.StatusOK, gin.H{"message": "Tournament already drawn, you just have to update your scores", "hasError": true})
+			defer cancel()
+			return
+		}
+
+		participants, err := registerTournamentCollection.Find(ctx, bson.M{"tournamentid": draw.TournamentId})
+			defer cancel()
+			if err != nil{
+				c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+				defer cancel()
+				return
+			}
+			fmt.Printf("%+v\n", "stage is 1")
+
+			var fil []models.RegisterTournament
+
+			if err := participants.All(ctx, &fil); err != nil {
+				c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+				return
+			}	
+			
+
+			var teams models.BRTeams
+			
+			for i := range fil {
+				teams.Kills = 0
+				teams.Wins = 0
+				teams.FirstBloods = 0
+				teams.TeamName = fil[i].TeamName
+				teams.Players = fil[i].Players
+				draw.BRTeams = append(draw.BRTeams, teams)
+			}
+			
+		
+			resultInsertionNumber, insertErr := drawCollection.InsertOne(ctx, draw)
+			if insertErr !=nil {
+				c.JSON(http.StatusOK, gin.H{"message":  insertErr, "hasError": true})
+				defer cancel()
+				return
+			}
+			fmt.Printf("%v", resultInsertionNumber)
+			fmt.Printf("%+v\n", insertErr)
+			filter := bson.M{"tournamentid": draw.TournamentId}
+			set := bson.M{"$set": bson.M{"Start": true}}
+			value, err := tournamentCollection.UpdateOne(ctx, filter, set)
+			defer cancel()
+			fmt.Print(value)
+			
+			
+			c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "resultId":resultInsertionNumber,  "data": draw, "hasError": false})
+			defer cancel()
+			return
 	}
 }
 
@@ -463,6 +553,52 @@ func AddLink() gin.HandlerFunc{
 
 		update := bson.M{
 			"$set": bson.M{"Link": data.Link},
+		}
+
+		upsert := true
+		after := options.After
+		opt := options.FindOneAndUpdateOptions{
+			ReturnDocument: &after,
+			Upsert:         &upsert,
+		}
+
+		result := drawCollection.FindOneAndUpdate(ctx, filter, update, &opt)
+		if result.Err() != nil {
+			c.JSON(http.StatusOK, gin.H{"message":validationErr.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+		
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "draws":result, "hasError": false})
+	}
+}
+
+func UpdateBrDraw() gin.HandlerFunc{
+	return func(c *gin.Context){
+		id := c.Param("drawId")
+		
+		var data models.BRTeams
+		
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+
+		if err := c.BindJSON(&data); err != nil {
+			c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+		
+		validationErr := validate.Struct(data)
+		if validationErr != nil {
+			c.JSON(http.StatusOK, gin.H{"message":validationErr.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+
+		filter := bson.M{"drawid": id}
+
+		update := bson.M{
+			"$set": bson.M{"brteams": data},
 		}
 
 		upsert := true
