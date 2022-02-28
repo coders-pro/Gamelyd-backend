@@ -54,7 +54,6 @@ func Signup()gin.HandlerFunc{
 			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "hasError": true})
 			defer cancel()
 			return
-			
 		}
 
 		user.IsSuspended = false

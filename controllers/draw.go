@@ -576,11 +576,13 @@ func AddLink() gin.HandlerFunc{
 func UpdateBrDraw() gin.HandlerFunc{
 	return func(c *gin.Context){
 		id := c.Param("drawId")
-		type Data struct {
-			Teams models.BRTeams
+		
+		type Back struct {
+			Players []models.BRTeams
 		}
 		
-		var data Data
+		var data Back
+		var teams []models.BRTeams
 		
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		defer cancel()
@@ -591,17 +593,22 @@ func UpdateBrDraw() gin.HandlerFunc{
 			return
 		}
 		
-		// validationErr := validate.Struct(data)
-		// if validationErr != nil {
-		// 	c.JSON(http.StatusOK, gin.H{"message":validationErr.Error(), "hasError": true})
-		// 	defer cancel()
-		// 	return
-		// }
+		validationErr := validate.Struct(data)
+		if validationErr != nil {
+			c.JSON(http.StatusOK, gin.H{"message":validationErr.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+
+		for i := range data.Players {
+			teams = append(teams, data.Players[i])
+		}
+
 
 		filter := bson.M{"drawid": id}
 
 		update := bson.M{
-			"$set": bson.M{"brteams": data.Teams},
+			"$set": bson.M{"brteams": teams},
 		}
 
 		upsert := true
@@ -618,6 +625,6 @@ func UpdateBrDraw() gin.HandlerFunc{
 			return
 		}
 		
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "draws":result, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "id": id, "draws":ctx, "hasError": false})
 	}
 }
