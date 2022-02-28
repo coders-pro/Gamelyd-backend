@@ -576,8 +576,11 @@ func AddLink() gin.HandlerFunc{
 func UpdateBrDraw() gin.HandlerFunc{
 	return func(c *gin.Context){
 		id := c.Param("drawId")
+		type Data struct {
+			Teams models.BRTeams
+		}
 		
-		var data models.BRTeams
+		var data Data
 		
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		defer cancel()
@@ -598,7 +601,7 @@ func UpdateBrDraw() gin.HandlerFunc{
 		filter := bson.M{"drawid": id}
 
 		update := bson.M{
-			"$set": bson.M{"brteams": data},
+			"$set": bson.M{"brteams": data.Teams},
 		}
 
 		upsert := true
