@@ -591,12 +591,12 @@ func UpdateBrDraw() gin.HandlerFunc{
 			return
 		}
 		
-		validationErr := validate.Struct(data)
-		if validationErr != nil {
-			c.JSON(http.StatusOK, gin.H{"message":validationErr.Error(), "hasError": true})
-			defer cancel()
-			return
-		}
+		// validationErr := validate.Struct(data)
+		// if validationErr != nil {
+		// 	c.JSON(http.StatusOK, gin.H{"message":validationErr.Error(), "hasError": true})
+		// 	defer cancel()
+		// 	return
+		// }
 
 		filter := bson.M{"drawid": id}
 
@@ -613,7 +613,7 @@ func UpdateBrDraw() gin.HandlerFunc{
 
 		result := drawCollection.FindOneAndUpdate(ctx, filter, update, &opt)
 		if result.Err() != nil {
-			c.JSON(http.StatusOK, gin.H{"message":validationErr.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message":"error updating record", "hasError": true})
 			defer cancel()
 			return
 		}
