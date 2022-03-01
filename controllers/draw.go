@@ -579,9 +579,13 @@ func UpdateBrDraw() gin.HandlerFunc{
 		
 		type Back struct {
 			Players []models.BRTeams
+			Link string
+			Date string
+			Time string
 		}
 		
 		var data Back
+		fmt.Print(data)
 		var teams []models.BRTeams
 		
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
@@ -592,7 +596,7 @@ func UpdateBrDraw() gin.HandlerFunc{
 			defer cancel()
 			return
 		}
-		
+		fmt.Print(data)
 		validationErr := validate.Struct(data)
 		if validationErr != nil {
 			c.JSON(http.StatusOK, gin.H{"message":validationErr.Error(), "hasError": true})
@@ -608,7 +612,7 @@ func UpdateBrDraw() gin.HandlerFunc{
 		filter := bson.M{"drawid": id}
 
 		update := bson.M{
-			"$set": bson.M{"brteams": teams},
+			"$set": bson.M{"brteams": teams, "time": data.Time, "link": data.Link, "date": data.Date},
 		}
 
 		upsert := true
