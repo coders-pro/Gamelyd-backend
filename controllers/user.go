@@ -382,3 +382,72 @@ func Test() gin.HandlerFunc{
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt",  "hasError": false})
 	}
 }
+
+//   Forgot Password
+
+  func ForgotPassword() gin.HandlerFunc {
+	  return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var user models.User
+		var foundUser models.User
+
+		if err := c.BindJSON(&user); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "hasError": true})
+			defer cancel()
+			return
+			
+		}
+
+		err := userCollection.FindOne(ctx, bson.M{"email":user.Email}).Decode(&foundUser)
+		defer cancel()
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{"message":"email is incorrect", "hasError": true})
+			return
+		}
+
+		if err == nil {
+			token, _, _ := helper.GenerateAllTokens(*foundUser.Email, *foundUser.First_name, *foundUser.Last_name, *foundUser.User_type, *&foundUser.User_id)
+
+			passedtoken := token
+
+			helper.ForgotPasswordMail(*foundUser.Email, passedtoken, *foundUser.User_name)
+
+			c.JSON(http.StatusOK, gin.H{"message": "Check your email for reset link", "hasError": false,})
+		}
+
+	}
+  }
+
+  func ResetPassword() gin.HandlerFunc {
+	  return func(c *gin.Context) {
+		type  ResetPassword struct {
+			NewPassword	string						`json:"NewPassword" validate:"required"`
+		}
+		var checkUser models.User
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var user ResetPassword
+
+		if err := c.BindJSON(&user); err != nil {
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+			return
+		}
+
+	err := userCollection.FindOne(ctx, bson.M{"user_id":c.GetString("uid")}).Decode(&checkUser)
+	defer cancel()
+	if err != nil{
+		c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+		return
+	}
+
+	filter := bson.M{"user_id": c.GetString("uid")}
+		set := bson.M{"$set": bson.M{"Password": HashPassword(user.NewPassword)}}
+		value, err := userCollection.UpdateOne(ctx, filter, set)
+		defer cancel()
+		if err != nil{
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Password changed succesfully", "value": value, "hasError": false})
+		
+	}
+  }

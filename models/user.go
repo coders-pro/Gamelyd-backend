@@ -35,3 +35,4 @@ type  ChangePassword struct {
 	Password		*string					`json:"Password" validate:"required,min=5"`
 	NewPassword	string						`json:"NewPassword" validate:"required"`
 }
+
