@@ -15,7 +15,7 @@ func ForgotPasswordMail(receiver string, token string, username string) {
   
 	// Receiver email address.
 	to := []string{
-	  "madustanley1@gmail.com",
+	  receiver,
 	}
   
 	// smtp server configuration.

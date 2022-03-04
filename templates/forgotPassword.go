@@ -88,12 +88,12 @@ func ForgotPassword(token string, name string) string {
   replace := "[[name]]"
   newValue := name
   n := 1
-   strings.Replace(text, replace, newValue, n)
+  text = strings.Replace(text, replace, newValue, n)
  
   replace1 := "[[token]]"
   newValue1 := token
   n1 := 1
-   strings.Replace(text, replace1, newValue1, n1)
+  text = strings.Replace(text, replace1, newValue1, n1)
 
   fmt.Println("Result   String : ", text)
 
