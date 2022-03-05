@@ -119,10 +119,9 @@ func Signup()gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message":msg, "hasError": true})
 			return
 		}
-		defer cancel()
 		helper.SendEmail(*user.Email, templates.RegisterEmail(*user.First_name + " " + *user.Last_name), "Welcome To Gamelyd")
 
-		// helper.SendEmail(*user.First_name + " " + *user.Last_name, *user.Email)
+		defer cancel()
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data":user, "hasError": false, "insertId": resultInsertionNumber})
 	}
 
