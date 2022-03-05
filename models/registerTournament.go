@@ -23,4 +23,7 @@ type RegisterTournament struct{
 	TournamentDate			string					`json:"TournamentDate" validate:"required"`
 	RegisterTournamentId	string					`json:"RegisterTournamentId" validate:"required"`
 	TeamName				string					`json:"TeamName" validate:"required"`
+	RefNumber				string					`json:"RefNumber"`
+	PaymentChannel			string					`json:"PaymentChannel"`
+	Amount					int						`json:"Amount"`
 }
