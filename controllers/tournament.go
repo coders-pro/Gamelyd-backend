@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"github.com/Gameware/database"
+	"github.com/Gameware/templates"
+
 	helper "github.com/Gameware/helpers"
 	"github.com/Gameware/models"
 	"github.com/gin-gonic/gin"
@@ -63,6 +65,8 @@ func SaveTournament() gin.HandlerFunc{
 			return
 		}
 		defer cancel()
+		helper.SendEmail(c.GetString("email"), templates.CreateTournament(c.GetString("first_name") + " " + c.GetString("last_name")), "New Tournament")
+
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data":tournament, "hasError": false, "insertId": resultInsertionNumber})
 	}
 }
@@ -164,6 +168,7 @@ func RegisterTournament()gin.HandlerFunc{
 			}
 		}
 
+
 		resultInsertionNumber, insertErr := registerTournamentCollection.InsertOne(ctx, registerTournament)
 		if insertErr !=nil {
 			msg := "item was not created"
@@ -172,6 +177,9 @@ func RegisterTournament()gin.HandlerFunc{
 			return
 		}
 		defer cancel()
+		for j := range registerTournament.Players {
+			helper.SendEmail(registerTournament.Players[j].Email, templates.RegisterTournament(registerTournament.Players[j].UserName, registerTournament.TournamentName, registerTournament.TeamName, registerTournament.TournamentDate, registerTournament.TournamentId), "New Tournament")
+		}
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data":registerTournament, "hasError": false, "insertId": resultInsertionNumber})
 	}
 }

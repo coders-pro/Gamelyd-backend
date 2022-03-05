@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-func ForgotPassword(token string, name string) string {
+func RegisterEmail(name string) string {
 
   text := `
   <html lang="en-US">
@@ -46,18 +46,25 @@ func ForgotPassword(token string, name string) string {
                                   </tr>
                                   <tr>
                                       <td style="padding:0 35px;">
-                                          <h1 style="color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;">You have
-                                              requested to reset your password</h1>
+                                          <h1 style="color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;">Welcome to gamelyd</h1>
                                           <span
                                               style="display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;"></span>
                                           <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
-                                             Hi [[name]] We cannot simply send you your old password. A unique link to reset your
-                                              password has been generated for you. To reset your password, click the
-                                              following link and follow the instructions.
+                                             Hi [[name]]
                                           </p>
-                                          <a href="https://joyrideapp.herokuapp.com/auth/reset-password/[[token]]"
-                                              style="background:#0BC0B4;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;">Reset
-                                              Password</a>
+										  <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
+										  	This is really exciting: welcome (officially) to your service here, we are so lucky to have you.
+									   	  </p>
+										  <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
+										  	We are here to make sure you get the maximum gaming experience you expect from using this plartform, so dont hesitate to reach out with questions, we would love to hear from you.
+									   	  </p>
+
+											<p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
+											 If you need support you can email us on support@gamelyd.com, we can talk you through the information you need to get started.
+											</p>
+
+											<p style="color:#455056; font-size:15px;line-height:24px; margin:0;">Looking forward to hearing from you,</p>
+									   	  </p>
                                       </td>
                                   </tr>
                                   <tr>
@@ -120,12 +127,5 @@ func ForgotPassword(token string, name string) string {
   newValue := name
   n := 1
   text = strings.Replace(text, replace, newValue, n)
- 
-  replace1 := "[[token]]"
-  newValue1 := token
-  n1 := 1
-  text = strings.Replace(text, replace1, newValue1, n1)
-
-
   return text
 }

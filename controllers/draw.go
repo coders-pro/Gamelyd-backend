@@ -11,7 +11,10 @@ import (
 
 	"github.com/Gameware/database"
 	"github.com/Gameware/models"
+	"github.com/Gameware/templates"
 	"github.com/gin-gonic/gin"
+
+	helper "github.com/Gameware/helpers"
 
 	// "go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson"
@@ -94,7 +97,7 @@ func Draw() gin.HandlerFunc{
 						draw.Stage = 1
 						draw.DrawId = draw.ID.Hex()
 						formatData = append(formatData, draw)
-											
+										
 						count++
 		
 					}else {
@@ -115,19 +118,27 @@ func Draw() gin.HandlerFunc{
 				draw.Winner = "Team1"
 				draw.ID = primitive.NewObjectID()
 				draw.DrawId = draw.ID.Hex()
-
 				formatData = append(formatData, draw)
 			}
 			fmt.Println(reflect.TypeOf(allData))
 			for _, t := range formatData {
 				allData = append(allData, t)
 			}
-		
+						
+
 			resultInsertionNumber, insertErr := drawCollection.InsertMany(ctx, allData)
 			if insertErr !=nil {
 				c.JSON(http.StatusOK, gin.H{"message":  insertErr, "hasError": true})
 				defer cancel()
 				return
+			}
+			for t, _ := range formatData {
+				for i, _ := range formatData[t].Team1.Players {
+						helper.SendEmail(draw.Team1.Players[i].Email , templates.DrawTournament(draw.Team1.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
+				}
+				for i, _ := range formatData[t].Team2.Players {
+						helper.SendEmail(draw.Team2.Players[i].Email , templates.DrawTournament(draw.Team2.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
+				}
 			}
 			// fmt.Printf("%v", resultInsertionNumber)
 			// fmt.Printf("%+v\n", insertErr)
@@ -136,7 +147,7 @@ func Draw() gin.HandlerFunc{
 			value, err := tournamentCollection.UpdateOne(ctx, filter, set)
 			defer cancel()
 			fmt.Print(value)
-			
+
 			
 			c.JSON(http.StatusOK, gin.H{"message": "request processed successfull", "data": allData, "hasError": false, "insertIds": resultInsertionNumber})
 			defer cancel()
@@ -240,6 +251,15 @@ func Draw() gin.HandlerFunc{
 				c.JSON(http.StatusOK, gin.H{"message":  insertErr.Error(), "hasError": true})
 				defer cancel()
 				return
+			}
+
+			for t, _ := range submitData {
+				for i, _ := range submitData[t].Team1.Players {
+						helper.SendEmail(draw.Team1.Players[i].Email , templates.DrawTournament(draw.Team1.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
+				}
+				for i, _ := range submitData[t].Team2.Players {
+						helper.SendEmail(draw.Team2.Players[i].Email , templates.DrawTournament(draw.Team2.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
+				}
 			}
 			filter := bson.M{"tournamentid": draw.TournamentId}
 			set := bson.M{"$set": bson.M{"Start": true}}
@@ -628,6 +648,10 @@ func UpdateBrDraw() gin.HandlerFunc{
 			defer cancel()
 			return
 		}
+
+		// if data.Time != "" {
+
+		// }
 		
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "id": id, "draws":ctx, "hasError": false})
 	}

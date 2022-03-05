@@ -11,6 +11,7 @@ import (
 	"github.com/Gameware/database"
 	helper "github.com/Gameware/helpers"
 	"github.com/Gameware/models"
+	"github.com/Gameware/templates"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
@@ -119,6 +120,9 @@ func Signup()gin.HandlerFunc{
 			return
 		}
 		defer cancel()
+		helper.SendEmail(*user.Email, templates.RegisterEmail(*user.First_name + " " + *user.Last_name), "Welcome To Gamelyd")
+
+		// helper.SendEmail(*user.First_name + " " + *user.Last_name, *user.Email)
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data":user, "hasError": false, "insertId": resultInsertionNumber})
 	}
 
@@ -359,36 +363,27 @@ func ChangePassword() gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
+		helper.SendEmail(*checkUser.Email, templates.PasswordChanged(*checkUser.First_name + " " + *checkUser.Last_name), "Your Password Was Changed")
+
 		c.JSON(http.StatusOK, gin.H{"message": "Password changed succesfully", "value": value, "hasError": false})
 	}
 }
 
 func Test() gin.HandlerFunc{
 	return func(c *gin.Context){
-		userId := c.Param("userId")
-		tournamentId := c.Param("tournamentId")
-
-		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
-		
-		
-		
-		result,err := registerTournamentCollection.Find(ctx,  bson.M{"players.user_id":userId, "tournamentid": tournamentId})
-		
-		defer cancel()
-		if err!=nil{
-			c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
-			return
+		type UserEm struct {
+			Email string
+			First_name string
+			Last_name string
 		}
-
-		var data []models.RegisterTournament
-		if err = result.All(ctx, &data); err!=nil{
-			c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
-			return
-		}
-
+		var user UserEm
+			user.Email = "madustanley1@gmail.com"
+			user.First_name = "Madu"
+			user.Last_name = "Stanley"
 		
-		
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt",  "hasError": data[0].Players})
+		helper.SendEmail(user.Email, templates.RegisterEmail(user.First_name + " " + user.Last_name), "Welcome To Gamelyd")
+
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt",  "hasError": false})
 	}
 }
 

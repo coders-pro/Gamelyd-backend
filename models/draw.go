@@ -9,6 +9,7 @@ type  Player struct {
 	UserName		string					`json:"UserName" validate:"required"`
 	GameUserName	string					`json:"GameUserName" validate:"required"`
 	User_id			string					`json:"User_id" validate:"required"`
+	Email			string					`json:"Email" validate:"required"`
 }
 
 type  Teams struct {

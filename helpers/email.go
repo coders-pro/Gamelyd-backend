@@ -1,10 +1,11 @@
 package helper
 
 import (
-	"net/smtp"
 	"fmt"
+	"net/smtp"
 
 	templates "github.com/Gameware/templates"
+	mail "github.com/xhit/go-simple-mail/v2"
 )
 
 func ForgotPasswordMail(receiver string, token string, username string) {
@@ -37,5 +38,38 @@ func ForgotPasswordMail(receiver string, token string, username string) {
 	  return
 	}
 	fmt.Println("Email Sent Successfully!")
+
+  }
+
+  func SendEmail(receiver string, template string, subject string) {
+
+
+	server := mail.NewSMTPClient()
+	server.Host = "shipping-cargo.com"
+	server.Port = 587
+	server.Username = "info@shipping-cargo.com"
+	server.Password = "ZzFV@#UqT7JAr"
+	server.Encryption = mail.EncryptionTLS
+
+	smtpClient, err := server.Connect()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Create email
+	email := mail.NewMSG()
+	email.SetFrom("Mcbobby from Gamelyd <info@shipping-cargo.com>")
+	email.AddTo(receiver)
+	email.SetSubject(subject)
+
+	email.SetBody(mail.TextHTML, template)
+	// email.AddAttachment("super_cool_file.png")
+
+	// Send email
+	err = email.Send(smtpClient)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 
   }
