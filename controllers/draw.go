@@ -12,7 +12,8 @@ import (
 	"github.com/Gameware/database"
 	"github.com/Gameware/models"
 
-	// "github.com/Gameware/templates"
+	helper "github.com/Gameware/helpers"
+	"github.com/Gameware/templates"
 	"github.com/gin-gonic/gin"
 
 	// "go.mongodb.org/mongo-driver/bson"
@@ -131,16 +132,16 @@ func Draw() gin.HandlerFunc{
 				defer cancel()
 				return
 			}
-			// for t, _ := range formatData {
-			// 	for i, _ := range formatData[t].Team1.Players {
-			// 			helper.SendEmail(draw.Team1.Players[i].Email , templates.DrawTournament(draw.Team1.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
-			// 	}
-			// 	for i, _ := range formatData[t].Team2.Players {
-			// 			helper.SendEmail(draw.Team2.Players[i].Email , templates.DrawTournament(draw.Team2.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
-			// 	}
-			// }
-			// fmt.Printf("%v", resultInsertionNumber)
-			// fmt.Printf("%+v\n", insertErr)
+			for t, _ := range formatData {
+				for i, _ := range formatData[t].Team1.Players {
+						helper.SendEmail(draw.Team1.Players[i].Email , templates.DrawTournament(draw.Team1.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
+				}
+				for i, _ := range formatData[t].Team2.Players {
+						helper.SendEmail(draw.Team2.Players[i].Email , templates.DrawTournament(draw.Team2.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
+				}
+			}
+			fmt.Printf("%v", resultInsertionNumber)
+			fmt.Printf("%+v\n", insertErr)
 			filter := bson.M{"tournamentid": draw.TournamentId}
 			set := bson.M{"$set": bson.M{"Start": true}}
 			value, err := tournamentCollection.UpdateOne(ctx, filter, set)
@@ -252,14 +253,14 @@ func Draw() gin.HandlerFunc{
 				return
 			}
 
-			// for t, _ := range submitData {
-			// 	for i, _ := range submitData[t].Team1.Players {
-			// 			helper.SendEmail(draw.Team1.Players[i].Email , templates.DrawTournament(draw.Team1.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
-			// 	}
-			// 	for i, _ := range submitData[t].Team2.Players {
-			// 			helper.SendEmail(draw.Team2.Players[i].Email , templates.DrawTournament(draw.Team2.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
-			// 	}
-			// }
+			for t, _ := range submitData {
+				for i, _ := range submitData[t].Team1.Players {
+						helper.SendEmail(draw.Team1.Players[i].Email , templates.DrawTournament(draw.Team1.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
+				}
+				for i, _ := range submitData[t].Team2.Players {
+						helper.SendEmail(draw.Team2.Players[i].Email , templates.DrawTournament(draw.Team2.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
+				}
+			}
 			filter := bson.M{"tournamentid": draw.TournamentId}
 			set := bson.M{"$set": bson.M{"Start": true}}
 			value, err := tournamentCollection.UpdateOne(ctx, filter, set)
