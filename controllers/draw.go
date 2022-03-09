@@ -31,6 +31,7 @@ func Draw() gin.HandlerFunc{
 	return func(c *gin.Context){
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		var draw models.Draw
+		var mailList []models.Player
 
 		if err := c.BindJSON(&draw); err != nil {
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
@@ -134,10 +135,10 @@ func Draw() gin.HandlerFunc{
 			}
 			for t, _ := range formatData {
 				for i, _ := range formatData[t].Team1.Players {
-						helper.SendEmail(draw.Team1.Players[i].Email , templates.DrawTournament(draw.Team1.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
+					mailList = append(mailList, formatData[t].Team1.Players[i])
 				}
 				for i, _ := range formatData[t].Team2.Players {
-						helper.SendEmail(draw.Team2.Players[i].Email , templates.DrawTournament(draw.Team2.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
+					mailList = append(mailList, formatData[t].Team1.Players[i])
 				}
 			}
 			fmt.Printf("%v", resultInsertionNumber)
@@ -150,6 +151,9 @@ func Draw() gin.HandlerFunc{
 
 			
 			c.JSON(http.StatusOK, gin.H{"message": "request processed successfull", "data": allData, "hasError": false, "insertIds": resultInsertionNumber})
+			for i := range mailList {
+				helper.SendEmail(mailList[i].Email , templates.DrawTournament(mailList[i].UserName, "", draw.TournamentId), "Tournament Draw")	
+			}
 			defer cancel()
 			return
 		}else {
@@ -255,10 +259,10 @@ func Draw() gin.HandlerFunc{
 
 			for t, _ := range submitData {
 				for i, _ := range submitData[t].Team1.Players {
-						helper.SendEmail(draw.Team1.Players[i].Email , templates.DrawTournament(draw.Team1.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
+					mailList = append(mailList, submitData[t].Team1.Players[i])
 				}
 				for i, _ := range submitData[t].Team2.Players {
-						helper.SendEmail(draw.Team2.Players[i].Email , templates.DrawTournament(draw.Team2.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
+					mailList = append(mailList, submitData[t].Team1.Players[i])
 				}
 			}
 			filter := bson.M{"tournamentid": draw.TournamentId}
@@ -268,6 +272,9 @@ func Draw() gin.HandlerFunc{
 			fmt.Print(value)
 	
 	c.JSON(http.StatusOK, gin.H{"message": "request processed successfull", "hasError": false, "data": newAll, "insertId": resultInsertionNumber})
+	for i := range mailList {
+		helper.SendEmail(mailList[i].Email , templates.DrawTournament(mailList[i].UserName, "", draw.TournamentId), "Tournament Draw")	
+	}
 	defer cancel()
 	return
 
