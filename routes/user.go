@@ -18,6 +18,7 @@ func UserRoutes(incomingRoutes *gin.Engine){
 	incomingRoutes.POST("/users/reset", controller.ResetPassword())
 	incomingRoutes.GET("/users/delete/:user_id", controller.DeleteUser())
 	incomingRoutes.GET("/users/tournaments/:id", controller.ListUserTournament())
+	incomingRoutes.GET("/users/tournaments/:id/limit", controller.ListUserTournamentLimit())
 	
 
 }

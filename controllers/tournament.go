@@ -260,6 +260,33 @@ func ListUserTournament() gin.HandlerFunc{
 	}
 }
 
+func ListUserTournamentLimit() gin.HandlerFunc{
+	return func(c *gin.Context){
+		id := c.Param("id")
+		
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		myOptions := options.Find()
+		myOptions.SetLimit(7)
+		myOptions.SetSort(bson.M{"$natural":-1})
+
+		returnTournament, err := tournamentCollection.Find(ctx, bson.M{"user_id": id}, myOptions)
+		defer cancel()
+		if err != nil{
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+			return
+		}
+
+		var fil []bson.M
+
+		if err = returnTournament.All(ctx, &fil); err != nil {
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+			return
+		}
+		
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "tournaments":fil, "hasError": false})
+	}
+}
+
 func GetTournaments() gin.HandlerFunc{
 	return func(c *gin.Context){
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
@@ -301,6 +328,35 @@ func GetTournamentsByMode() gin.HandlerFunc{
 			page = 1
 		}
 		myOptions := options.Find()
+		myOptions.SetSort(bson.M{"$natural":-1})
+		result,err := tournamentCollection.Find(ctx,  bson.M{"payment": payment}, myOptions)
+		defer cancel()
+		if err!=nil{
+			c.JSON(http.StatusOK, gin.H{"message":"error occured while listing tournaments", "hasError": true})
+			return
+		}
+		var data []bson.M
+		if err = result.All(ctx, &data); err!=nil{
+			log.Fatal(err)
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "tournaments":data, "hasError": false})}
+}
+
+func GetTournamentsByModeLimit() gin.HandlerFunc{
+	return func(c *gin.Context){
+		payment := c.Param("paymentMode")
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		
+		recordPerPage, err := strconv.Atoi(c.Query("recordPerPage"))
+		if err != nil || recordPerPage <1{
+			recordPerPage = 10
+		}
+		page, err1 := strconv.Atoi(c.Query("page"))
+		if err1 !=nil || page<1{
+			page = 1
+		}
+		myOptions := options.Find()
+		myOptions.SetLimit(20)
 		myOptions.SetSort(bson.M{"$natural":-1})
 		result,err := tournamentCollection.Find(ctx,  bson.M{"payment": payment}, myOptions)
 		defer cancel()
@@ -420,13 +476,40 @@ func SuspendTournament() gin.HandlerFunc{
 
 func UserTournaments() gin.HandlerFunc{
 	return func(c *gin.Context){
-		username := c.Param("username")
+		id := c.Param("id")
 
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		
 		myOptions := options.Find()
 		myOptions.SetSort(bson.M{"$natural":-1})
-		result,err := registerTournamentCollection.Find(ctx,  bson.M{"players.username":username}, myOptions)
+		result,err := registerTournamentCollection.Find(ctx,  bson.M{"players.user_id":id}, myOptions)
+		
+		defer cancel()
+		if err!=nil{
+			c.JSON(http.StatusOK, gin.H{"message":"error occured listing user data", "hasError": true})
+			return
+		}
+
+		var data []bson.M
+		if err = result.All(ctx, &data); err!=nil{
+			c.JSON(http.StatusOK, gin.H{"message":"error occured listing data", "hasError": true})
+		}
+
+
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "tournaments":data, "hasError": false})}
+		
+}
+
+func UserTournamentsLimit() gin.HandlerFunc{
+	return func(c *gin.Context){
+		id := c.Param("id")
+
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		
+		myOptions := options.Find()
+		myOptions.SetLimit(7)
+		myOptions.SetSort(bson.M{"$natural":-1})
+		result,err := registerTournamentCollection.Find(ctx,  bson.M{"players.user_id":id}, myOptions)
 		
 		defer cancel()
 		if err!=nil{
