@@ -30,7 +30,7 @@ func ForgotPassword(token string, name string) string {
                       <tr>
                           <td style="text-align:center;">
                             <a href="https://rakeshmandal.com" title="logo" target="_blank">
-                              <img src="https://gamelyd-madumcbobby.vercel.app/images/logos/logo.png" title="logo" alt="logo">
+                              <img width="200" src="https://gamelyd-madumcbobby.vercel.app/images/logos/logo.png" title="logo" alt="logo">
                             </a>
                           </td>
                       </tr>
