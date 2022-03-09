@@ -226,7 +226,7 @@ func Draw() gin.HandlerFunc{
 						}
 						for i, _ := range request.Team2.Players {
 							helper.SendEmail(request.Team2.Players[i].Email , templates.DrawTournament(request.Team2.Players[i].UserName, "", request.TournamentId), "Tournament Draw")
-						}										
+						}									
 						newCount++
 				
 				}else {
@@ -236,7 +236,7 @@ func Draw() gin.HandlerFunc{
 	}
 	if len(newDraw)%2 != 0 {
 		if len(newDraw) != 2 {
-			request2.Team1 =  newDraw[len(fil) - 1]
+			request2.Team1 =  newDraw[len(newDraw) - 1]
 			request2.Team2.Players = nil
 			request2.Winner = "Team1"
 			request2.Stage = draw.Stage
@@ -261,19 +261,19 @@ func Draw() gin.HandlerFunc{
 			newAll = append(newAll, t)
 		}
 
-		resultInsertionNumber, insertErr := drawCollection.InsertMany(ctx, newAll)
-			if insertErr !=nil {
-				c.JSON(http.StatusOK, gin.H{"message":  insertErr.Error(), "hasError": true})
-				defer cancel()
-				return
-			}
+		// resultInsertionNumber, insertErr := drawCollection.InsertMany(ctx, newAll)
+		// 	if insertErr !=nil {
+		// 		c.JSON(http.StatusOK, gin.H{"message":  insertErr.Error(), "hasError": true})
+		// 		defer cancel()
+		// 		return
+		// 	}
 			filter := bson.M{"tournamentid": draw.TournamentId}
 			set := bson.M{"$set": bson.M{"Start": true}}
 			value, err := tournamentCollection.UpdateOne(ctx, filter, set)
 			defer cancel()
 			fmt.Print(value)
 	
-	c.JSON(http.StatusOK, gin.H{"message": "request processed successfull", "hasError": false, "data": newAll, "insertId": resultInsertionNumber})
+	c.JSON(http.StatusOK, gin.H{"message": "request processed successfull", "hasError": false, "data": newAll, "newDraw": newDraw})
 	defer cancel()
 	return
 
