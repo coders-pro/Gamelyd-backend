@@ -524,7 +524,7 @@ func AddScore() gin.HandlerFunc{
 		filter := bson.M{"drawid": id}
 
 		update := bson.M{
-			"$set": bson.M{"Team1Score": data.Team1 , "Team2Score": data.Team2, "Winner": data.Winner},
+			"$set": bson.M{"Team1Score": data.Team1 , "Team2Score": data.Team2, "Winner": data.Winner, "winner": data.Winner},
 		}
 
 		upsert := true
