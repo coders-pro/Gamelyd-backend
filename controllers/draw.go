@@ -261,12 +261,12 @@ func Draw() gin.HandlerFunc{
 			newAll = append(newAll, t)
 		}
 
-		// resultInsertionNumber, insertErr := drawCollection.InsertMany(ctx, newAll)
-		// 	if insertErr !=nil {
-		// 		c.JSON(http.StatusOK, gin.H{"message":  insertErr.Error(), "hasError": true})
-		// 		defer cancel()
-		// 		return
-		// 	}
+		_, insertErr := drawCollection.InsertMany(ctx, newAll)
+			if insertErr !=nil {
+				c.JSON(http.StatusOK, gin.H{"message":  insertErr.Error(), "hasError": true})
+				defer cancel()
+				return
+			}
 			filter := bson.M{"tournamentid": draw.TournamentId}
 			set := bson.M{"$set": bson.M{"Start": true}}
 			value, err := tournamentCollection.UpdateOne(ctx, filter, set)
