@@ -97,7 +97,12 @@ func Draw() gin.HandlerFunc{
 						draw.Stage = 1
 						draw.DrawId = draw.ID.Hex()
 						formatData = append(formatData, draw)
-										
+						for i, _ := range draw.Team1.Players {
+							helper.SendEmail(draw.Team1.Players[i].Email , templates.DrawTournament(draw.Team1.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
+						}
+						for i, _ := range draw.Team2.Players {
+							helper.SendEmail(draw.Team2.Players[i].Email , templates.DrawTournament(draw.Team2.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
+						}
 						count++
 		
 					}else {
@@ -119,6 +124,9 @@ func Draw() gin.HandlerFunc{
 				draw.ID = primitive.NewObjectID()
 				draw.DrawId = draw.ID.Hex()
 				formatData = append(formatData, draw)
+				for i, _ := range draw.Team1.Players {
+					helper.SendEmail(draw.Team1.Players[i].Email , templates.DrawTournament(draw.Team1.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
+				}
 			}
 			fmt.Println(reflect.TypeOf(allData))
 			for _, t := range formatData {
@@ -131,14 +139,6 @@ func Draw() gin.HandlerFunc{
 				c.JSON(http.StatusOK, gin.H{"message":  insertErr, "hasError": true})
 				defer cancel()
 				return
-			}
-			for t, _ := range formatData {
-				for i, _ := range formatData[t].Team1.Players {
-						helper.SendEmail(draw.Team1.Players[i].Email , templates.DrawTournament(draw.Team1.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
-				}
-				for i, _ := range formatData[t].Team2.Players {
-						helper.SendEmail(draw.Team2.Players[i].Email , templates.DrawTournament(draw.Team2.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
-				}
 			}
 			fmt.Printf("%v", resultInsertionNumber)
 			fmt.Printf("%+v\n", insertErr)
@@ -201,6 +201,12 @@ func Draw() gin.HandlerFunc{
 			request.DrawId = request.ID.Hex()
 			request.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 			request.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+			for i, _ := range request.Team1.Players {
+				helper.SendEmail(request.Team1.Players[i].Email , templates.DrawTournament(request.Team1.Players[i].UserName, "", request.TournamentId), "Tournament Draw")
+			}
+			for i, _ := range request.Team2.Players {
+				helper.SendEmail(request.Team2.Players[i].Email , templates.DrawTournament(request.Team2.Players[i].UserName, "", request.TournamentId), "Tournament Draw")
+			}
 			submitData = append(submitData, request)			
 		}else {
 			for newCount < len(newDraw) {
@@ -214,7 +220,13 @@ func Draw() gin.HandlerFunc{
 						request.DrawId = request.ID.Hex()
 						request.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 						request.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-						submitData = append(submitData, request)										
+						submitData = append(submitData, request)
+						for i, _ := range request.Team1.Players {
+							helper.SendEmail(request.Team1.Players[i].Email , templates.DrawTournament(request.Team1.Players[i].UserName, "", request.TournamentId), "Tournament Draw")
+						}
+						for i, _ := range request.Team2.Players {
+							helper.SendEmail(request.Team2.Players[i].Email , templates.DrawTournament(request.Team2.Players[i].UserName, "", request.TournamentId), "Tournament Draw")
+						}										
 						newCount++
 				
 				}else {
@@ -234,6 +246,9 @@ func Draw() gin.HandlerFunc{
 			request2.DrawId = request2.ID.Hex()
 			request2.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 			request2.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+			for i, _ := range request.Team1.Players {
+				helper.SendEmail(request.Team1.Players[i].Email , templates.DrawTournament(request.Team1.Players[i].UserName, "", request.TournamentId), "Tournament Draw")
+			}
 
 			submitData = append(submitData, request2)
 		}
@@ -251,15 +266,6 @@ func Draw() gin.HandlerFunc{
 				c.JSON(http.StatusOK, gin.H{"message":  insertErr.Error(), "hasError": true})
 				defer cancel()
 				return
-			}
-
-			for t, _ := range submitData {
-				for i, _ := range submitData[t].Team1.Players {
-						helper.SendEmail(draw.Team1.Players[i].Email , templates.DrawTournament(draw.Team1.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
-				}
-				for i, _ := range submitData[t].Team2.Players {
-						helper.SendEmail(draw.Team2.Players[i].Email , templates.DrawTournament(draw.Team2.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
-				}
 			}
 			filter := bson.M{"tournamentid": draw.TournamentId}
 			set := bson.M{"$set": bson.M{"Start": true}}
