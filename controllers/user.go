@@ -413,7 +413,7 @@ func Test() gin.HandlerFunc{
 
 			passedtoken := token
 
-			helper.ForgotPasswordMail(*foundUser.Email, passedtoken, *foundUser.User_name)
+			helper.ForgotPasswordMail(*foundUser.Email, passedtoken, *foundUser.First_name + " " + *foundUser.Last_name)
 
 			c.JSON(http.StatusOK, gin.H{"message": "Check your email for reset link", "hasError": false,})
 		}
