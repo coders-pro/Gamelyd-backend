@@ -496,8 +496,24 @@ func AddTime() gin.HandlerFunc{
 			defer cancel()
 			return
 		}
+
+		var draws models.Draw 
+
+		err := drawCollection.FindOne(ctx, bson.M{"drawid":id}).Decode(&draws)
+		defer cancel()
+		if err != nil{
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+		for i, _ := range draws.Team1.Players {
+			helper.SendEmail(draws.Team1.Players[i].Email , templates.AddTime(draws.Team1.Players[i].UserName, "", draws.TournamentId, data.Time, data.Date), "Tournament Time and Date")
+		}
+		for i, _ := range draws.Team2.Players {
+			helper.SendEmail(draws.Team2.Players[i].Email , templates.AddTime(draws.Team2.Players[i].UserName, "", draws.TournamentId, data.Time, data.Date), "Tournament Time and Date")
+		}
 		
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "draws":result, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "draws":draws, "hasError": false})
 	}
 }
 
@@ -594,6 +610,22 @@ func AddLink() gin.HandlerFunc{
 			defer cancel()
 			return
 		}
+
+		var draws models.Draw 
+
+		err := drawCollection.FindOne(ctx, bson.M{"drawid":id}).Decode(&draws)
+		defer cancel()
+		if err != nil{
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+		for i, _ := range draws.Team1.Players {
+			helper.SendEmail(draws.Team1.Players[i].Email , templates.AddLink(draws.Team1.Players[i].UserName, "", draws.TournamentId), "Link to join match is now available")
+		}
+		for i, _ := range draws.Team2.Players {
+			helper.SendEmail(draws.Team2.Players[i].Email , templates.AddLink(draws.Team2.Players[i].UserName, "", draws.TournamentId), "Link to join match is now available")
+		}
 		
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "draws":result, "hasError": false})
 	}
@@ -660,5 +692,30 @@ func UpdateBrDraw() gin.HandlerFunc{
 		// }
 		
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "id": id, "draws":ctx, "hasError": false})
+		var draws models.Draw
+
+		err := drawCollection.FindOne(ctx, bson.M{"drawid":id}).Decode(&draws)
+		defer cancel()
+		if err != nil{
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+			defer cancel()
+			return
+		}
+		if data.Link != "" {
+			for i, _ := range data.Players {
+				for j, _ := range data.Players[i].Players {
+					helper.SendEmail(data.Players[i].Players[j].Email, templates.AddLink(data.Players[i].Players[j].UserName, "", draws.TournamentId), "Link to join match is now available")
+				}
+			}
+		}
+		if data.Time != "" {
+			for i, _ := range data.Players {
+				for j, _ := range data.Players[i].Players {
+					helper.SendEmail(data.Players[i].Players[j].Email, templates.AddTime(data.Players[i].Players[j].UserName, "", draws.TournamentId, data.Time, data.Date), "Tournament Time and Date")
+				}
+			}
+		}
+		
+		return
 	}
 }
