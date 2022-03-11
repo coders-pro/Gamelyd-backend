@@ -43,6 +43,24 @@ func Draw() gin.HandlerFunc{
 		draw.ID = primitive.NewObjectID()
 		draw.DrawId = draw.ID.Hex()
 
+		filter := bson.M{"tournamentid": draw.TournamentId }
+
+		update := bson.M{
+			"$set": bson.M{"start": true},
+		}
+		upsert := true
+		after := options.After
+		opt := options.FindOneAndUpdateOptions{
+			ReturnDocument: &after,
+			Upsert:         &upsert,
+		}
+
+		result := tournamentCollection.FindOneAndUpdate(ctx, filter, update, &opt)
+		if result.Err() != nil {
+			c.JSON(http.StatusOK, gin.H{"message": "Error please try again", "hasError": true})
+			defer cancel()
+			return
+		}
 
 		if draw.Stage == 1 {
 			participants, err := registerTournamentCollection.Find(ctx, bson.M{"tournamentid": draw.TournamentId})
