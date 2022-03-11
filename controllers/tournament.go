@@ -531,6 +531,19 @@ func RemoveUser() gin.HandlerFunc{
 		tournamentId := c.Param("tournamentId")
 
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+
+		var tournament models.Tournament
+		err := tournamentCollection.FindOne(ctx, bson.M{"tournamentid":tournamentId}).Decode(&tournament)
+		defer cancel()
+		if err != nil{
+			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
+			return
+		}
+
+		if tournament.Start == true {
+				c.JSON(http.StatusOK, gin.H{"message": "Tournament Ongoing or finished, registration not allowed", "hasError": true})
+				return
+		}
 		
 		
 		
