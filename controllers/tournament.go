@@ -327,7 +327,7 @@ func GetTournamentsByMode() gin.HandlerFunc{
 		}
 		myOptions := options.Find()
 		myOptions.SetSort(bson.M{"$natural":-1})
-		result,err := tournamentCollection.Find(ctx,  bson.M{"payment": payment}, myOptions)
+		result,err := tournamentCollection.Find(ctx,  bson.M{"payment": payment, "tournamenttype": "PUBLIC"}, myOptions)
 		defer cancel()
 		if err!=nil{
 			c.JSON(http.StatusOK, gin.H{"message":"error occured while listing tournaments", "hasError": true})
@@ -356,7 +356,7 @@ func GetTournamentsByModeLimit() gin.HandlerFunc{
 		myOptions := options.Find()
 		myOptions.SetLimit(20)
 		myOptions.SetSort(bson.M{"$natural":-1})
-		result,err := tournamentCollection.Find(ctx,  bson.M{"payment": payment}, myOptions)
+		result,err := tournamentCollection.Find(ctx,  bson.M{"payment": payment, "tournamenttype": "PUBLIC"}, myOptions)
 		defer cancel()
 		if err!=nil{
 			c.JSON(http.StatusOK, gin.H{"message":"error occured while listing tournaments", "hasError": true})
@@ -541,7 +541,7 @@ func RemoveUser() gin.HandlerFunc{
 		}
 
 		if tournament.Start == true {
-				c.JSON(http.StatusOK, gin.H{"message": "Tournament Ongoing or finished, registration not allowed", "hasError": true})
+				c.JSON(http.StatusOK, gin.H{"message": "Tournament Ongoing or finished, unregistration not allowed", "hasError": true})
 				return
 		}
 		
