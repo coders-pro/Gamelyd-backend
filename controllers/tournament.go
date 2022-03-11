@@ -120,10 +120,8 @@ func RegisterTournament()gin.HandlerFunc{
 		registerTournament.TournamentDate = *&tournament.Date
 
 		if tournament.Start == true {
-			if err != nil{
 				c.JSON(http.StatusOK, gin.H{"message": "Tournament Ongoing or finished, registration not allowed", "hasError": true})
 				return
-			}
 		}
 
 		validationErr := validate.Struct(registerTournament)
