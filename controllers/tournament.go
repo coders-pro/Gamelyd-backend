@@ -65,7 +65,7 @@ func SaveTournament() gin.HandlerFunc{
 			return
 		}
 		defer cancel()
-		helper.SendEmail(c.GetString("email"), templates.CreateTournament(c.GetString("first_name") + " " + c.GetString("last_name")), "New Tournament")
+		go helper.SendEmail(c.GetString("email"), templates.CreateTournament(c.GetString("first_name") + " " + c.GetString("last_name")), "New Tournament")
 
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data":tournament, "hasError": false, "insertId": resultInsertionNumber})
 	}
@@ -176,7 +176,7 @@ func RegisterTournament()gin.HandlerFunc{
 		}
 		defer cancel()
 		for j := range registerTournament.Players {
-			helper.SendEmail(registerTournament.Players[j].Email, templates.RegisterTournament(registerTournament.Players[j].UserName, registerTournament.TournamentName, registerTournament.TeamName, registerTournament.TournamentDate, registerTournament.TournamentId), "New Tournament")
+			go helper.SendEmail(registerTournament.Players[j].Email, templates.RegisterTournament(registerTournament.Players[j].UserName, registerTournament.TournamentName, registerTournament.TeamName, registerTournament.TournamentDate, registerTournament.TournamentId), "New Tournament")
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data":registerTournament, "hasError": false, "insertId": resultInsertionNumber})
 	}

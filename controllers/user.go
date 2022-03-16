@@ -119,7 +119,7 @@ func Signup()gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message":msg, "hasError": true})
 			return
 		}
-		helper.SendEmail(*user.Email, templates.RegisterEmail(*user.First_name + " " + *user.Last_name), "Welcome To Gamelyd")
+		go helper.SendEmail(*user.Email, templates.RegisterEmail(*user.First_name + " " + *user.Last_name), "Welcome To Gamelyd")
 
 		defer cancel()
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data":user, "hasError": false, "insertId": resultInsertionNumber})
@@ -362,7 +362,7 @@ func ChangePassword() gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
-		helper.SendEmail(*checkUser.Email, templates.PasswordChanged(*checkUser.First_name + " " + *checkUser.Last_name), "Your Password Was Changed")
+		go helper.SendEmail(*checkUser.Email, templates.PasswordChanged(*checkUser.First_name + " " + *checkUser.Last_name), "Your Password Was Changed")
 
 		c.JSON(http.StatusOK, gin.H{"message": "Password changed succesfully", "value": value, "hasError": false})
 	}
@@ -380,7 +380,7 @@ func Test() gin.HandlerFunc{
 			user.First_name = "Madu"
 			user.Last_name = "Stanley"
 		
-		helper.SendEmail(user.Email, templates.RegisterEmail(user.First_name + " " + user.Last_name), "Welcome To Gamelyd")
+		go helper.SendEmail(user.Email, templates.RegisterEmail(user.First_name + " " + user.Last_name), "Welcome To Gamelyd")
 
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt",  "hasError": false})
 	}
