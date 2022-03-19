@@ -55,7 +55,7 @@ func ForgotPassword(token string, name string) string {
                                               password has been generated for you. To reset your password, click the
                                               following link and follow the instructions.
                                           </p>
-                                          <a href="http://localhost:3000/resetpassword/[[token]]"
+                                          <a href="https://gamelyd.co//resetpassword/[[token]]"
                                               style="background:#0BC0B4;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;">Reset
                                               Password</a>
                                       </td>
@@ -88,7 +88,7 @@ func ForgotPassword(token string, name string) string {
                           line-height: 18px;
                           margin: 0 0 0;
                         ">If you did not initiate this email please contact us on contact@gamelyd.com or
-                        visit our<a href="http://gamelyd.com"> website</a></p>
+                        visit our<a href="https://gamelyd.co/"> website</a></p>
                         <div style="
         
                         margin: 20px 0;

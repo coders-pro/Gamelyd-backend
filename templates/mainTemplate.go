@@ -30,7 +30,7 @@ func PasswordChanged(name string) string {
                       <tr>
                           <td style="text-align:center;">
                             <a href="https://rakeshmandal.com" title="logo" target="_blank">
-                              <img width="200" src="https://gamelyd-madumcbobby.vercel.app/images/logos/logo.png" title="logo" alt="logo">
+                              <img width="200" src="https://gamelyd.co/images/logos/logo.png" title="logo" alt="logo">
                             </a>
                           </td>
                       </tr>
@@ -92,7 +92,7 @@ func PasswordChanged(name string) string {
                           line-height: 18px;
                           margin: 0 0 0;
                         ">If you did not initiate this email please contact us on contact@gamelyd.com or
-                        visit our<a href="http://gamelyd.com"> website</a></p>
+                        visit our<a href="https://gamelyd.co"> website</a></p>
                         <div style="
 
                         margin: 20px 0;
@@ -153,7 +153,7 @@ func CreateTournament(name string) string {
                       <tr>
                           <td style="text-align:center;">
                             <a href="https://rakeshmandal.com" title="logo" target="_blank">
-                              <img width="200" src="https://gamelyd-madumcbobby.vercel.app/images/logos/logo.png" title="logo" alt="logo">
+                              <img width="200" src="https://gamelyd.co/images/logos/logo.png" title="logo" alt="logo">
                             </a>
                           </td>
                       </tr>
@@ -215,7 +215,7 @@ func CreateTournament(name string) string {
                           line-height: 18px;
                           margin: 0 0 0;
                         ">If you did not initiate this email please contact us on contact@gamelyd.com or
-                        visit our<a href="http://gamelyd.com"> website</a></p>
+                        visit our<a href="https://gamelyd.co"> website</a></p>
                         <div style="
 
                         margin: 20px 0;
@@ -277,7 +277,7 @@ func CreateTournament(name string) string {
                       <tr>
                           <td style="text-align:center;">
                             <a href="https://rakeshmandal.com" title="logo" target="_blank">
-                              <img width="200" src="https://gamelyd-madumcbobby.vercel.app/images/logos/logo.png" title="logo" alt="logo">
+                              <img width="200" src="https://gamelyd.co/images/logos/logo.png" title="logo" alt="logo">
                             </a>
                           </td>
                       </tr>
@@ -309,7 +309,7 @@ func CreateTournament(name string) string {
 
                          <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">Thank You</p>
 
-                         <a href="https://gamelyd-madumcbobby.vercel.app/tournament/view/[[id]]"
+                         <a href="https://gamelyd.co/tournament/view/[[id]]"
                           style="background:#0BC0B4;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;">
                           View Tournament</a>
 
@@ -344,7 +344,7 @@ func CreateTournament(name string) string {
                           line-height: 18px;
                           margin: 0 0 0;
                         ">If you did not initiate this email please contact us on contact@gamelyd.com or
-                        visit our<a href="http://gamelyd.com"> website</a></p>
+                        visit our<a href="https://gamelyd.co"> website</a></p>
                         <div style="
 
                         margin: 20px 0;
@@ -411,7 +411,7 @@ func CreateTournament(name string) string {
                       <tr>
                           <td style="text-align:center;">
                             <a href="https://rakeshmandal.com" title="logo" target="_blank">
-                              <img width="200" src="https://gamelyd-madumcbobby.vercel.app/images/logos/logo.png" title="logo" alt="logo">
+                              <img width="200" src="https://gamelyd.co/images/logos/logo.png" title="logo" alt="logo">
                             </a>
                           </td>
                       </tr>
@@ -440,7 +440,7 @@ func CreateTournament(name string) string {
 
                          <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">Thank You</p>
 
-                         <a href="https://gamelyd-madumcbobby.vercel.app/tournament/view/[[id]]"
+                         <a href="https://gamelyd.co/tournament/view/[[id]]"
                           style="background:#0BC0B4;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;">
                           View Tournament</a>
 
@@ -475,7 +475,7 @@ func CreateTournament(name string) string {
                           line-height: 18px;
                           margin: 0 0 0;
                         ">If you did not initiate this email please contact us on contact@gamelyd.com or
-                        visit our<a href="http://gamelyd.com"> website</a></p>
+                        visit our<a href="https://gamelyd.co"> website</a></p>
                         <div style="
 
                         margin: 20px 0;
@@ -541,7 +541,7 @@ func CreateTournament(name string) string {
                         <tr>
                             <td style="text-align:center;">
                               <a href="https://rakeshmandal.com" title="logo" target="_blank">
-                                <img width="200" src="https://gamelyd-madumcbobby.vercel.app/images/logos/logo.png" title="logo" alt="logo">
+                                <img width="200" src="https://gamelyd.co/images/logos/logo.png" title="logo" alt="logo">
                               </a>
                             </td>
                         </tr>
@@ -570,7 +570,7 @@ func CreateTournament(name string) string {
   
                            <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">Thank You</p>
   
-                           <a href="https://gamelyd-madumcbobby.vercel.app/tournament/view/[[id]]"
+                           <a href="https://gamelyd.co/tournament/view/[[id]]"
                             style="background:#0BC0B4;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;">
                             View Tournament</a>
   
@@ -605,7 +605,7 @@ func CreateTournament(name string) string {
                             line-height: 18px;
                             margin: 0 0 0;
                           ">If you did not initiate this email please contact us on contact@gamelyd.com or
-                          visit our<a href="http://gamelyd.com"> website</a></p>
+                          visit our<a href="https://gamelyd.co"> website</a></p>
                           <div style="
   
                           margin: 20px 0;
@@ -672,7 +672,7 @@ func CreateTournament(name string) string {
                           <tr>
                               <td style="text-align:center;">
                                 <a href="https://rakeshmandal.com" title="logo" target="_blank">
-                                  <img width="200" src="https://gamelyd-madumcbobby.vercel.app/images/logos/logo.png" title="logo" alt="logo">
+                                  <img width="200" src="https://gamelyd.co/images/logos/logo.png" title="logo" alt="logo">
                                 </a>
                               </td>
                           </tr>
@@ -701,7 +701,7 @@ func CreateTournament(name string) string {
     
                              <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">Thank You</p>
     
-                             <a href="https://gamelyd-madumcbobby.vercel.app/tournament/view/[[id]]"
+                             <a href="https://gamelyd.co/tournament/view/[[id]]"
                               style="background:#0BC0B4;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;">
                               View Tournament</a>
     
@@ -736,7 +736,7 @@ func CreateTournament(name string) string {
                               line-height: 18px;
                               margin: 0 0 0;
                             ">If you did not initiate this email please contact us on contact@gamelyd.com or
-                            visit our<a href="http://gamelyd.com"> website</a></p>
+                            visit our<a href="https://gamelyd.co"> website</a></p>
                             <div style="
     
                             margin: 20px 0;
