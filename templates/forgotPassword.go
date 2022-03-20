@@ -30,7 +30,7 @@ func ForgotPassword(token string, name string) string {
                       <tr>
                           <td style="text-align:center;">
                             <a href="https://rakeshmandal.com" title="logo" target="_blank">
-                              <img width="200" src="https://gamelyd-madumcbobby.vercel.app/images/logos/logo.png" title="logo" alt="logo">
+                              <img width="200" src="https://gamelyd.co/images/logos/logo.png" title="logo" alt="logo">
                             </a>
                           </td>
                       </tr>
@@ -55,7 +55,7 @@ func ForgotPassword(token string, name string) string {
                                               password has been generated for you. To reset your password, click the
                                               following link and follow the instructions.
                                           </p>
-                                          <a href="https://gamelyd.co//resetpassword/[[token]]"
+                                          <a href="https://gamelyd.co/resetpassword/[[token]]"
                                               style="background:#0BC0B4;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;">Reset
                                               Password</a>
                                       </td>
