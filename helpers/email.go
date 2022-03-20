@@ -10,10 +10,10 @@ import (
 func ForgotPasswordMail(receiver string, token string, username string) {
 
 	server := mail.NewSMTPClient()
-	server.Host = "shipping-cargo.com"
+	server.Host = "gamelyd.co"
 	server.Port = 587
-	server.Username = "info@shipping-cargo.com"
-	server.Password = "ZzFV@#UqT7JAr"
+	server.Username = "no-reply@gamelyd.co"
+	server.Password = "gamelydpass"
 	server.Encryption = mail.EncryptionTLS
 
 	smtpClient, err := server.Connect()
@@ -23,7 +23,7 @@ func ForgotPasswordMail(receiver string, token string, username string) {
 
 	// Create email
 	email := mail.NewMSG()
-	email.SetFrom("Mcbobby from Gamelyd <info@shipping-cargo.com>")
+	email.SetFrom("Mcbobby from Gamelyd <no-reply@gamelyd.co>")
 	email.AddTo(receiver)
 	email.SetSubject("Reset Password")
 
@@ -38,8 +38,8 @@ func ForgotPasswordMail(receiver string, token string, username string) {
 
 	
 	// Sender data.
-	// from := "info@shipping-cargo.com"
-	// password := "ZzFV@#UqT7JAr"
+	// from := "no-reply@gamelyd.co"
+	// password := "gamelydpass"
   
 	// // Receiver email address.
 	// to := []string{
@@ -47,7 +47,7 @@ func ForgotPasswordMail(receiver string, token string, username string) {
 	// }
   
 	// smtp server configuration.
-	// smtpHost := "shipping-cargo.com"
+	// smtpHost := "gamelyd.co"
 	// smtpPort := "26"
   
 	// // Message.
@@ -72,10 +72,10 @@ func ForgotPasswordMail(receiver string, token string, username string) {
 
 
 	server := mail.NewSMTPClient()
-	server.Host = "shipping-cargo.com"
+	server.Host = "gamelyd.co"
 	server.Port = 587
-	server.Username = "info@shipping-cargo.com"
-	server.Password = "ZzFV@#UqT7JAr"
+	server.Username = "no-reply@gamelyd.co"
+	server.Password = "gamelydpass"
 	server.Encryption = mail.EncryptionTLS
 
 	smtpClient, err := server.Connect()
@@ -85,7 +85,7 @@ func ForgotPasswordMail(receiver string, token string, username string) {
 
 	// Create email
 	email := mail.NewMSG()
-	email.SetFrom("Mcbobby from Gamelyd <info@shipping-cargo.com>")
+	email.SetFrom("Mcbobby from Gamelyd <no-reply@gamelyd.co>")
 	email.AddTo(receiver)
 	email.SetSubject(subject)
 

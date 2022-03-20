@@ -11,6 +11,9 @@ import (
 	"github.com/Gameware/models"
 	"github.com/gin-gonic/gin"
 
+	helper "github.com/Gameware/helpers"
+	"github.com/Gameware/templates"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -52,6 +55,8 @@ func SaveReportAbuse() gin.HandlerFunc{
 			return
 		}
 		defer cancel()
+		go helper.SendEmail("madumcbobby@yahoo.com", templates.ReportAbuse(report.Name, report.Message), "Abuse Report From Gamelyd")
+
 		c.JSON(http.StatusOK, gin.H{"message": "Hang on and relax we will take it from here", "data":report, "hasError": false, "insertId": resultInsertionNumber})
 	}
 }

@@ -376,7 +376,7 @@ func Test() gin.HandlerFunc{
 			Last_name string
 		}
 		var user UserEm
-			user.Email = "madustanley1@gmail.com"
+			user.Email = "madumcbobby@yahoo.com"
 			user.First_name = "Madu"
 			user.Last_name = "Stanley"
 		
