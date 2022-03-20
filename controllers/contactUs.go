@@ -55,7 +55,7 @@ func SaveContactUs() gin.HandlerFunc{
 			return
 		}
 		defer cancel()
-		go helper.SendEmail("madumcbobby@yahoo.com", templates.ReportAbuse(contact.Name, contact.Message), "Contact From Gamelyd")
+		go helper.SendEmail("madumcbobby@yahoo.com", templates.ReportAbuse(contact.Name, contact.Message, contact.Email), "Contact From Gamelyd")
 
 		c.JSON(http.StatusOK, gin.H{"message": "Successfull, we will get back to you soon", "data":contact, "hasError": false, "insertId": resultInsertionNumber})
 	}

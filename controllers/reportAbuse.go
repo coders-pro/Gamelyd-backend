@@ -55,7 +55,7 @@ func SaveReportAbuse() gin.HandlerFunc{
 			return
 		}
 		defer cancel()
-		go helper.SendEmail("madumcbobby@yahoo.com", templates.ReportAbuse(report.Name, report.Message), "Abuse Report From Gamelyd")
+		go helper.SendEmail("madumcbobby@yahoo.com", templates.ReportAbuse(report.Name, report.Message, report.Email), "Abuse Report From Gamelyd")
 
 		c.JSON(http.StatusOK, gin.H{"message": "Hang on and relax we will take it from here", "data":report, "hasError": false, "insertId": resultInsertionNumber})
 	}
