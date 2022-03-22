@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"strconv"
 
 	"net/http"
@@ -237,8 +238,20 @@ func ListUserTournament() gin.HandlerFunc{
 		id := c.Param("id")
 		
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+
+
+		var perPage int64= 9
+		page, err  := strconv.Atoi(c.Param("page"))
+
+		if page == 0 || page < 1 {
+			page = 1
+		}
+		total, _ := tournamentCollection.CountDocuments(ctx, bson.M{"user_id": id})
+		
 		myOptions := options.Find()
 		myOptions.SetSort(bson.M{"$natural":-1})
+		myOptions.SetLimit(perPage)
+		myOptions.SetSkip((int64(page) - 1) * int64(perPage))
 
 		returnTournament, err := tournamentCollection.Find(ctx, bson.M{"user_id": id}, myOptions)
 		defer cancel()
@@ -254,7 +267,7 @@ func ListUserTournament() gin.HandlerFunc{
 			return
 		}
 		
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "tournaments":fil, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "total": total, "page": page, "last_page": math.Ceil(float64(total / perPage)) + 1, "tournaments":fil, "hasError": false})
 	}
 }
 
@@ -289,16 +302,19 @@ func GetTournaments() gin.HandlerFunc{
 	return func(c *gin.Context){
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		
-		recordPerPage, err := strconv.Atoi(c.Query("recordPerPage"))
-		if err != nil || recordPerPage <1{
-			recordPerPage = 10
-		}
-		page, err1 := strconv.Atoi(c.Query("page"))
-		if err1 !=nil || page<1{
+		var perPage int64= 10
+		page, err  := strconv.Atoi(c.Param("page"))
+
+		if page == 0 || page < 1 {
 			page = 1
 		}
+		total, _ := tournamentCollection.CountDocuments(ctx, bson.M{})
+
+		
 		myOptions := options.Find()
 		myOptions.SetSort(bson.M{"$natural":-1})
+		myOptions.SetLimit(perPage)
+		myOptions.SetSkip((int64(page) - 1) * int64(perPage))
 		result,err := tournamentCollection.Find(ctx,  bson.M{}, myOptions)
 		defer cancel()
 		if err!=nil{
@@ -309,7 +325,7 @@ func GetTournaments() gin.HandlerFunc{
 		if err = result.All(ctx, &data); err!=nil{
 			log.Fatal(err)
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "tournaments":data, "hasError": false})}
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "total": total, "page": page, "last_page": math.Ceil(float64(total / perPage)) + 1, "tournaments":data, "hasError": false})}
 }
 
 func GetTournamentsByMode() gin.HandlerFunc{
@@ -317,16 +333,19 @@ func GetTournamentsByMode() gin.HandlerFunc{
 		payment := c.Param("paymentMode")
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		
-		recordPerPage, err := strconv.Atoi(c.Query("recordPerPage"))
-		if err != nil || recordPerPage <1{
-			recordPerPage = 10
-		}
-		page, err1 := strconv.Atoi(c.Query("page"))
-		if err1 !=nil || page<1{
+		var perPage int64= 15
+		page, err  := strconv.Atoi(c.Param("page"))
+
+		if page == 0 || page < 1 {
 			page = 1
 		}
+		total, _ := tournamentCollection.CountDocuments(ctx, bson.M{"payment": payment, "tournamenttype": "PUBLIC"})
+
+		
 		myOptions := options.Find()
 		myOptions.SetSort(bson.M{"$natural":-1})
+		myOptions.SetLimit(perPage)
+		myOptions.SetSkip((int64(page) - 1) * int64(perPage))
 		result,err := tournamentCollection.Find(ctx,  bson.M{"payment": payment, "tournamenttype": "PUBLIC"}, myOptions)
 		defer cancel()
 		if err!=nil{
@@ -337,7 +356,7 @@ func GetTournamentsByMode() gin.HandlerFunc{
 		if err = result.All(ctx, &data); err!=nil{
 			log.Fatal(err)
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "tournaments":data, "hasError": false})}
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "total": total, "page": page, "last_page": math.Ceil(float64(total / perPage)) + 1, "tournaments":data, "hasError": false})}
 }
 
 func GetTournamentsByModeLimit() gin.HandlerFunc{
@@ -354,7 +373,7 @@ func GetTournamentsByModeLimit() gin.HandlerFunc{
 			page = 1
 		}
 		myOptions := options.Find()
-		myOptions.SetLimit(20)
+		myOptions.SetLimit(10)
 		myOptions.SetSort(bson.M{"$natural":-1})
 		result,err := tournamentCollection.Find(ctx,  bson.M{"payment": payment, "tournamenttype": "PUBLIC"}, myOptions)
 		defer cancel()
@@ -477,9 +496,20 @@ func UserTournaments() gin.HandlerFunc{
 		id := c.Param("id")
 
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+
+		var perPage int64= 9
+		page, err  := strconv.Atoi(c.Param("page"))
+
+		if page == 0 || page < 1 {
+			page = 1
+		}
+		total, _ := registerTournamentCollection.CountDocuments(ctx, bson.M{"players.user_id":id})
 		
 		myOptions := options.Find()
 		myOptions.SetSort(bson.M{"$natural":-1})
+		myOptions.SetLimit(perPage)
+		myOptions.SetSkip((int64(page) - 1) * int64(perPage))
+		
 		result,err := registerTournamentCollection.Find(ctx,  bson.M{"players.user_id":id}, myOptions)
 		
 		defer cancel()
@@ -494,7 +524,7 @@ func UserTournaments() gin.HandlerFunc{
 		}
 
 
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "tournaments":data, "hasError": false})}
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "total": total, "page": page, "last_page": math.Ceil(float64(total / perPage)) + 1, "tournaments":data, "hasError": false})}
 		
 }
 
