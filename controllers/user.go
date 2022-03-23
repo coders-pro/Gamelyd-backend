@@ -287,10 +287,10 @@ func GetUser() gin.HandlerFunc{
 	return func(c *gin.Context){
 		userId := c.Param("user_id")
 
-		if err := helper.MatchUserTypeToUid(c, userId); err != nil {
-			c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
-			return
-		}
+		// if err := helper.MatchUserTypeToUid(c, userId); err != nil {
+		// 	c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
+		// 	return
+		// }
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
 		var user models.User
