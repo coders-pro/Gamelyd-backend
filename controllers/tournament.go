@@ -303,19 +303,46 @@ func GetTournaments() gin.HandlerFunc{
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		
 		var perPage int64= 10
+		filter := bson.M{"tournamenttype": "PUBLIC"}
 		page, err  := strconv.Atoi(c.Param("page"))
+		searchString  := c.Param("search")
 
 		if page == 0 || page < 1 {
 			page = 1
 		}
-		total, _ := tournamentCollection.CountDocuments(ctx, bson.M{})
 
 		
 		myOptions := options.Find()
 		myOptions.SetSort(bson.M{"$natural":-1})
 		myOptions.SetLimit(perPage)
 		myOptions.SetSkip((int64(page) - 1) * int64(perPage))
-		result,err := tournamentCollection.Find(ctx,  bson.M{}, myOptions)
+		if searchString != "" {
+			println("working")
+			filter = bson.M{
+				"tournamenttype": "PUBLIC",
+				"$or": []bson.M{
+					{
+						"name": bson.M{
+							"$regex": primitive.Regex{
+								Pattern: searchString,
+								Options: "i",
+							},
+						},
+					},
+					{
+						"gamename": bson.M{
+							"$regex": primitive.Regex{
+								Pattern: searchString,
+								Options: "i",
+							},
+						},
+					},
+				},
+			}
+		}
+		total, _ := tournamentCollection.CountDocuments(ctx, filter)
+
+		result,err := tournamentCollection.Find(ctx,  filter, myOptions)
 		defer cancel()
 		if err!=nil{
 			c.JSON(http.StatusOK, gin.H{"message":"error occured while listing tournaments", "hasError": true})

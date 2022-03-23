@@ -19,6 +19,7 @@ func UserRoutes(incomingRoutes *gin.Engine){
 	incomingRoutes.GET("/users/delete/:user_id", controller.DeleteUser())
 	incomingRoutes.GET("/users/tournaments/:id/:page", controller.ListUserTournament())
 	incomingRoutes.GET("/users/tournaments/:id/limit", controller.ListUserTournamentLimit())
+	incomingRoutes.GET("/users/search/:search/:page", controller.SearchUsers())
 	
 
 }

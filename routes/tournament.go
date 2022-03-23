@@ -9,7 +9,7 @@ import (
 func TournamentRoutes(incomingRoutes *gin.Engine){
 	incomingRoutes.Use(middleware.Authenticate())
 	incomingRoutes.POST("/tournament/save", controller.SaveTournament())
-	incomingRoutes.GET("/tournaments/:page", controller.GetTournaments())
+	incomingRoutes.GET("/tournaments/:search/:page", controller.GetTournaments())
 	incomingRoutes.GET("/tournament/:id", controller.GetTournament())
 	incomingRoutes.GET("/tournament/delete/:id", controller.DeleteTournament())
 	incomingRoutes.GET("/tournament/suspend/:id", controller.SuspendTournament())

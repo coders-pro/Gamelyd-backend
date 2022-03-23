@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -215,6 +217,71 @@ func GetUsers() gin.HandlerFunc{
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "users":allusers, "hasError": false})}
 }
+
+func SearchUsers() gin.HandlerFunc{
+	return func(c *gin.Context){
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		
+		var perPage int64= 10
+		filter := bson.M{}
+		page, err  := strconv.Atoi(c.Param("page"))
+		searchString  := c.Param("search")
+
+		if page == 0 || page < 1 {
+			page = 1
+		}
+
+		
+		myOptions := options.Find()
+		myOptions.SetSort(bson.M{"$natural":-1})
+		myOptions.SetLimit(perPage)
+		myOptions.SetSkip((int64(page) - 1) * int64(perPage))
+		if searchString != "" {
+			println("working")
+			filter = bson.M{
+				"$or": []bson.M{
+					{
+						"user_name": bson.M{
+							"$regex": primitive.Regex{
+								Pattern: searchString,
+								Options: "i",
+							},
+						},
+					},
+					{
+						"first_name": bson.M{
+							"$regex": primitive.Regex{
+								Pattern: searchString,
+								Options: "i",
+							},
+						},
+					},
+					{
+						"last_name": bson.M{
+							"$regex": primitive.Regex{
+								Pattern: searchString,
+								Options: "i",
+							},
+						},
+					},
+				},
+			}
+		}
+		total, _ := userCollection.CountDocuments(ctx, filter)
+
+		result,err := userCollection.Find(ctx,  filter, myOptions)
+		defer cancel()
+		if err!=nil{
+			c.JSON(http.StatusOK, gin.H{"message":"error occured while listing users", "hasError": true})
+			return
+		}
+		var data []bson.M
+		if err = result.All(ctx, &data); err!=nil{
+			log.Fatal(err)
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "total": total, "page": page, "last_page": math.Ceil(float64(total / perPage)) + 1, "users":data, "hasError": false})}
+}
+
 
 func GetUser() gin.HandlerFunc{
 	return func(c *gin.Context){
