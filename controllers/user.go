@@ -215,7 +215,7 @@ func GetUsers() gin.HandlerFunc{
 		if err = result.All(ctx, &allusers); err!=nil{
 			log.Fatal(err)
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "users":allusers, "hasError": false})}
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "users":allusers, "hasError": false})}
 }
 
 func SearchUsers() gin.HandlerFunc{
@@ -279,7 +279,7 @@ func SearchUsers() gin.HandlerFunc{
 		if err = result.All(ctx, &data); err!=nil{
 			log.Fatal(err)
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "total": total, "page": page, "last_page": math.Ceil(float64(total / perPage)) + 1, "users":data, "hasError": false})}
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "total": total, "page": page, "last_page": math.Ceil(float64(total / perPage)) + 1, "users":data, "hasError": false})}
 }
 
 
@@ -300,7 +300,7 @@ func GetUser() gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "user":user, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "user":user, "hasError": false})
 	}
 }
 
@@ -449,7 +449,7 @@ func Test() gin.HandlerFunc{
 		
 		go helper.SendEmail(user.Email, templates.RegisterEmail(user.First_name + " " + user.Last_name), "Welcome To Gamelyd")
 
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt",  "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully",  "hasError": false})
 	}
 }
 

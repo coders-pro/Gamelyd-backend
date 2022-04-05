@@ -414,7 +414,7 @@ func GetDrawByTornamentID() gin.HandlerFunc{
 			return
 		}
 		
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "draws":fil, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "draws":fil, "hasError": false})
 	}
 }
 

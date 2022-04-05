@@ -200,7 +200,7 @@ func GetTournament() gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "tournament":tournament, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "tournament":tournament, "hasError": false})
 	}
 }
 
@@ -229,7 +229,7 @@ func ListPartTournament() gin.HandlerFunc{
 			return
 		}
 		
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "tournament":fil, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "tournament":fil, "hasError": false})
 	}
 }
 
@@ -267,7 +267,7 @@ func ListUserTournament() gin.HandlerFunc{
 			return
 		}
 		
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "total": total, "page": page, "last_page": math.Ceil(float64(total / perPage)) + 1, "tournaments":fil, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "total": total, "page": page, "last_page": math.Ceil(float64(total / perPage)) + 1, "tournaments":fil, "hasError": false})
 	}
 }
 
@@ -294,7 +294,7 @@ func ListUserTournamentLimit() gin.HandlerFunc{
 			return
 		}
 		
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "tournaments":fil, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "tournaments":fil, "hasError": false})
 	}
 }
 
@@ -352,7 +352,7 @@ func GetTournaments() gin.HandlerFunc{
 		if err = result.All(ctx, &data); err!=nil{
 			log.Fatal(err)
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "total": total, "page": page, "last_page": math.Ceil(float64(total / perPage)) + 1, "tournaments":data, "hasError": false})}
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "total": total, "page": page, "last_page": math.Ceil(float64(total / perPage)) + 1, "tournaments":data, "hasError": false})}
 }
 
 func GetTournamentsByMode() gin.HandlerFunc{
@@ -383,7 +383,7 @@ func GetTournamentsByMode() gin.HandlerFunc{
 		if err = result.All(ctx, &data); err!=nil{
 			log.Fatal(err)
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "total": total, "page": page, "last_page": math.Ceil(float64(total / perPage)) + 1, "tournaments":data, "hasError": false})}
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "total": total, "page": page, "last_page": math.Ceil(float64(total / perPage)) + 1, "tournaments":data, "hasError": false})}
 }
 
 func GetTournamentsByModeLimit() gin.HandlerFunc{
@@ -412,7 +412,7 @@ func GetTournamentsByModeLimit() gin.HandlerFunc{
 		if err = result.All(ctx, &data); err!=nil{
 			log.Fatal(err)
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "tournaments":data, "hasError": false})}
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "tournaments":data, "hasError": false})}
 }
 
 func UpdateTournament() gin.HandlerFunc{
