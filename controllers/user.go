@@ -124,7 +124,7 @@ func Signup()gin.HandlerFunc{
 		go helper.SendEmail(*user.Email, templates.RegisterEmail(*user.First_name + " " + *user.Last_name), "Welcome To Gamelyd")
 
 		defer cancel()
-		c.JSON(http.StatusOK, gin.H{"message": "Registration successfull", "data":user, "hasError": false, "insertId": resultInsertionNumber})
+		c.JSON(http.StatusOK, gin.H{"message": "Registration successful", "data":user, "hasError": false, "insertId": resultInsertionNumber})
 	}
 
 }
@@ -166,7 +166,7 @@ func Login() gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "Login successfull", "data":foundUser, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "Login successful", "data":foundUser, "hasError": false})
 	}
 }
 func CheckUserName() gin.HandlerFunc{
