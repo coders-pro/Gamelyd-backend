@@ -68,7 +68,7 @@ func SaveTournament() gin.HandlerFunc{
 		defer cancel()
 		go helper.SendEmail(c.GetString("email"), templates.CreateTournament(c.GetString("first_name") + " " + c.GetString("last_name")), "New Tournament")
 
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data":tournament, "hasError": false, "insertId": resultInsertionNumber})
+		c.JSON(http.StatusOK, gin.H{"message": "Tournament created successfully", "data":tournament, "hasError": false, "insertId": resultInsertionNumber})
 	}
 }
 // userID 61e99c5efa54a7d01ff272ce
@@ -179,7 +179,7 @@ func RegisterTournament()gin.HandlerFunc{
 		for j := range registerTournament.Players {
 			go helper.SendEmail(registerTournament.Players[j].Email, templates.RegisterTournament(registerTournament.Players[j].UserName, registerTournament.TournamentName, registerTournament.TeamName, registerTournament.TournamentDate, registerTournament.TournamentId), "New Tournament")
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data":registerTournament, "hasError": false, "insertId": resultInsertionNumber})
+		c.JSON(http.StatusOK, gin.H{"message": "Registration successfull", "data":registerTournament, "hasError": false, "insertId": resultInsertionNumber})
 	}
 }
 func GetTournament() gin.HandlerFunc{
@@ -441,7 +441,7 @@ func UpdateTournament() gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data": value, "tournament":id, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "Tournament updated successfully", "data": value, "tournament":id, "hasError": false})
 
 	}	
 }
@@ -476,7 +476,7 @@ func DeleteTournament() gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data": value, "tournament":id, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "Tournament deleted successfully", "data": value, "tournament":id, "hasError": false})
 
 	}	
 }
@@ -513,7 +513,7 @@ func SuspendTournament() gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data": value, "tournament":id, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "Tournament suspended successfully", "data": value, "tournament":id, "hasError": false})
 
 	}	
 }
@@ -660,6 +660,6 @@ func RemoveUser() gin.HandlerFunc{
 			}
 
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "tournaments":newData, "hasError": false})}
+		c.JSON(http.StatusOK, gin.H{"message": "You have been removed from tournament", "tournaments":newData, "hasError": false})}
 		
 }

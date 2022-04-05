@@ -167,7 +167,7 @@ func Draw() gin.HandlerFunc{
 			fmt.Print(value)
 
 			
-			c.JSON(http.StatusOK, gin.H{"message": "request processed successfull", "data": allData, "hasError": false, "insertIds": resultInsertionNumber})
+			c.JSON(http.StatusOK, gin.H{"message": "Next draw processed successfully", "data": allData, "hasError": false, "insertIds": resultInsertionNumber})
 			defer cancel()
 			return
 		}else {
@@ -291,7 +291,7 @@ func Draw() gin.HandlerFunc{
 			defer cancel()
 			fmt.Print(value)
 	
-	c.JSON(http.StatusOK, gin.H{"message": "request processed successfull", "hasError": false, "data": newAll, "newDraw": newDraw})
+	c.JSON(http.StatusOK, gin.H{"message": "Next draw processed successfully", "hasError": false, "data": newAll, "newDraw": newDraw})
 	defer cancel()
 	return
 
@@ -385,7 +385,7 @@ func DrawBr() gin.HandlerFunc{
 			fmt.Print(value)
 			
 			
-			c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "resultId":resultInsertionNumber,  "data": draw, "hasError": false})
+			c.JSON(http.StatusOK, gin.H{"message": "Draw processed successfully", "resultId":resultInsertionNumber,  "data": draw, "hasError": false})
 			defer cancel()
 			return
 	}
@@ -464,7 +464,7 @@ func AddWinner() gin.HandlerFunc{
 			return
 		}
 		
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "draws":result, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "Winner added successfully", "draws":result, "hasError": false})
 	}
 }
 
@@ -531,7 +531,7 @@ func AddTime() gin.HandlerFunc{
 			go helper.SendEmail(draws.Team2.Players[i].Email , templates.AddTime(draws.Team2.Players[i].UserName, "", draws.TournamentId, data.Time, data.Date), "Tournament Time and Date")
 		}
 		
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "draws":draws, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "Time added successfully", "draws":draws, "hasError": false})
 	}
 }
 
@@ -581,7 +581,7 @@ func AddScore() gin.HandlerFunc{
 			return
 		}
 		
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "draws":result, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "Scores added successfully", "draws":result, "hasError": false})
 	}
 }
 
@@ -645,7 +645,7 @@ func AddLink() gin.HandlerFunc{
 			go helper.SendEmail(draws.Team2.Players[i].Email , templates.AddLink(draws.Team2.Players[i].UserName, "", draws.TournamentId), "Link to join match is now available")
 		}
 		
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "draws":result, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "Link added successfully", "draws":result, "hasError": false})
 	}
 }
 
@@ -709,7 +709,7 @@ func UpdateBrDraw() gin.HandlerFunc{
 
 		// }
 		
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "id": id, "draws":ctx, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "Draw updated successfully", "id": id, "draws":ctx, "hasError": false})
 		var draws models.Draw
 
 		err := drawCollection.FindOne(ctx, bson.M{"drawid":id}).Decode(&draws)

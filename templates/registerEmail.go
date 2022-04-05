@@ -108,7 +108,7 @@ func RegisterEmail(name string) string {
                             margin: 0 0 0;
                           "
                         >
-                          &copy; <strong>www.gamelyd.com</strong>
+                          &copy; <strong>www.gamelyd.co</strong>
                         </p>
                       </td>
                     </tr>
@@ -227,7 +227,7 @@ func ReportAbuse(name, message, email string) string {
                             margin: 0 0 0;
                           "
                         >
-                          &copy; <strong>www.gamelyd.com</strong>
+                          &copy; <strong>www.gamelyd.co</strong>
                         </p>
                       </td>
                     </tr>

@@ -105,7 +105,7 @@ func PasswordChanged(name string) string {
                             margin: 0 0 0;
                           "
                         >
-                          &copy; <strong>www.gamelyd.com</strong>
+                          &copy; <strong>www.gamelyd.co</strong>
                         </p>
                       </td>
                     </tr>
@@ -228,7 +228,7 @@ func CreateTournament(name string) string {
                             margin: 0 0 0;
                           "
                         >
-                          &copy; <strong>www.gamelyd.com</strong>
+                          &copy; <strong>www.gamelyd.co</strong>
                         </p>
                       </td>
                     </tr>
@@ -357,7 +357,7 @@ func CreateTournament(name string) string {
                             margin: 0 0 0;
                           "
                         >
-                          &copy; <strong>www.gamelyd.com</strong>
+                          &copy; <strong>www.gamelyd.co</strong>
                         </p>
                       </td>
                     </tr>
@@ -488,7 +488,7 @@ func CreateTournament(name string) string {
                             margin: 0 0 0;
                           "
                         >
-                          &copy; <strong>www.gamelyd.com</strong>
+                          &copy; <strong>www.gamelyd.co</strong>
                         </p>
                       </td>
                     </tr>
@@ -618,7 +618,7 @@ func CreateTournament(name string) string {
                               margin: 0 0 0;
                             "
                           >
-                            &copy; <strong>www.gamelyd.com</strong>
+                            &copy; <strong>www.gamelyd.co</strong>
                           </p>
                         </td>
                       </tr>
@@ -749,7 +749,7 @@ func CreateTournament(name string) string {
                                 margin: 0 0 0;
                               "
                             >
-                              &copy; <strong>www.gamelyd.com</strong>
+                              &copy; <strong>www.gamelyd.co</strong>
                             </p>
                           </td>
                         </tr>
