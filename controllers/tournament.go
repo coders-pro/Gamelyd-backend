@@ -115,6 +115,19 @@ func RegisterTournament()gin.HandlerFunc{
 			return
 		}
 
+		counted, err := registerTournamentCollection.CountDocuments(ctx, bson.M{"tournamentid": registerTournament.TournamentId})
+		defer cancel()
+		if err != nil {
+			log.Panic(err)
+			c.JSON(http.StatusOK, gin.H{"message":"error occured while checking for the team name", "hasError": true})
+			return
+		}
+
+		if counted == int64(*tournament.TournamentSize) {
+			c.JSON(http.StatusOK, gin.H{"message":"Registration limit reached for this tournament", "hasError": true})
+			return
+		}
+
 		
 		registerTournament.TournamentName = *tournament.Name
 		registerTournament.TournamentIcon = *tournament.Icon
@@ -179,7 +192,7 @@ func RegisterTournament()gin.HandlerFunc{
 		for j := range registerTournament.Players {
 			go helper.SendEmail(registerTournament.Players[j].Email, templates.RegisterTournament(registerTournament.Players[j].UserName, registerTournament.TournamentName, registerTournament.TeamName, registerTournament.TournamentDate, registerTournament.TournamentId), "New Tournament")
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "Registration successfull", "data":registerTournament, "hasError": false, "insertId": resultInsertionNumber})
+		c.JSON(http.StatusOK, gin.H{"counted": counted, "registerCount": tournament.TournamentSize, "message": "Registration successfull", "data":registerTournament, "hasError": false, "insertId": resultInsertionNumber})
 	}
 }
 func GetTournament() gin.HandlerFunc{
