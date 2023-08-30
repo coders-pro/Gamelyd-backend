@@ -22,7 +22,7 @@ func DBinstance() *mongo.Client{
 
 	client, err:= mongo.NewClient(options.Client().ApplyURI(MongoDb))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err, "err plenty")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
