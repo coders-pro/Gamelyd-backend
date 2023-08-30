@@ -4,13 +4,16 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/Gameware/database"
 	helper "github.com/Gameware/helpers"
 	"github.com/Gameware/models"
+	"github.com/Gameware/templates"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
@@ -54,7 +57,6 @@ func Signup()gin.HandlerFunc{
 			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "hasError": true})
 			defer cancel()
 			return
-			
 		}
 
 		user.IsSuspended = false
@@ -119,8 +121,10 @@ func Signup()gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message":msg, "hasError": true})
 			return
 		}
+		go helper.SendEmail(*user.Email, templates.RegisterEmail(*user.First_name + " " + *user.Last_name), "Welcome To Gamelyd")
+
 		defer cancel()
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data":user, "hasError": false, "insertId": resultInsertionNumber})
+		c.JSON(http.StatusOK, gin.H{"message": "Registration successful", "data":user, "hasError": false, "insertId": resultInsertionNumber})
 	}
 
 }
@@ -162,7 +166,7 @@ func Login() gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data":foundUser, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "Login successful", "data":foundUser, "hasError": false})
 	}
 }
 func CheckUserName() gin.HandlerFunc{
@@ -211,17 +215,82 @@ func GetUsers() gin.HandlerFunc{
 		if err = result.All(ctx, &allusers); err!=nil{
 			log.Fatal(err)
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "users":allusers, "hasError": false})}
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "users":allusers, "hasError": false})}
 }
+
+func SearchUsers() gin.HandlerFunc{
+	return func(c *gin.Context){
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		
+		var perPage int64= 10
+		filter := bson.M{}
+		page, err  := strconv.Atoi(c.Param("page"))
+		searchString  := c.Param("search")
+
+		if page == 0 || page < 1 {
+			page = 1
+		}
+
+		
+		myOptions := options.Find()
+		myOptions.SetSort(bson.M{"$natural":-1})
+		myOptions.SetLimit(perPage)
+		myOptions.SetSkip((int64(page) - 1) * int64(perPage))
+		if searchString != "" {
+			println("working")
+			filter = bson.M{
+				"$or": []bson.M{
+					{
+						"user_name": bson.M{
+							"$regex": primitive.Regex{
+								Pattern: searchString,
+								Options: "i",
+							},
+						},
+					},
+					{
+						"first_name": bson.M{
+							"$regex": primitive.Regex{
+								Pattern: searchString,
+								Options: "i",
+							},
+						},
+					},
+					{
+						"last_name": bson.M{
+							"$regex": primitive.Regex{
+								Pattern: searchString,
+								Options: "i",
+							},
+						},
+					},
+				},
+			}
+		}
+		total, _ := userCollection.CountDocuments(ctx, filter)
+
+		result,err := userCollection.Find(ctx,  filter, myOptions)
+		defer cancel()
+		if err!=nil{
+			c.JSON(http.StatusOK, gin.H{"message":"error occured while listing users", "hasError": true})
+			return
+		}
+		var data []bson.M
+		if err = result.All(ctx, &data); err!=nil{
+			log.Fatal(err)
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "total": total, "page": page, "last_page": math.Ceil(float64(total / perPage)) + 1, "users":data, "hasError": false})}
+}
+
 
 func GetUser() gin.HandlerFunc{
 	return func(c *gin.Context){
 		userId := c.Param("user_id")
 
-		if err := helper.MatchUserTypeToUid(c, userId); err != nil {
-			c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
-			return
-		}
+		// if err := helper.MatchUserTypeToUid(c, userId); err != nil {
+		// 	c.JSON(http.StatusOK, gin.H{"message":err.Error(), "hasError": true})
+		// 	return
+		// }
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
 		var user models.User
@@ -231,7 +300,7 @@ func GetUser() gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "user":user, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "user":user, "hasError": false})
 	}
 }
 
@@ -252,7 +321,7 @@ func DeleteUser() gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "user":user, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully", "user":user, "hasError": false})
 	}
 }
 
@@ -319,7 +388,7 @@ func UpdateUser() gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "data": value, "user":user, "hasError": false})
+		c.JSON(http.StatusOK, gin.H{"message": "User updated successfully", "data": value, "user":user, "hasError": false})
 
 	}	
 }
@@ -360,26 +429,27 @@ func ChangePassword() gin.HandlerFunc{
 			c.JSON(http.StatusOK, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
+		go helper.SendEmail(*checkUser.Email, templates.PasswordChanged(*checkUser.First_name + " " + *checkUser.Last_name), "Your Password Was Changed")
+
 		c.JSON(http.StatusOK, gin.H{"message": "Password changed succesfully", "value": value, "hasError": false})
 	}
 }
 
 func Test() gin.HandlerFunc{
 	return func(c *gin.Context){
-		user1 := "mcbobby"
-		user2 := "mcbobby1"
-
-		if user1 != user2 {
-			c.JSON(http.StatusOK, gin.H{"message": "1 is not 2",  "hasError": false})
-			return
+		type UserEm struct {
+			Email string
+			First_name string
+			Last_name string
 		}
-
-		if user1 == user2 {
-			c.JSON(http.StatusOK, gin.H{"message": "1 is 2",  "hasError": false})
-			return
-		}
+		var user UserEm
+			user.Email = "madumcbobby@yahoo.com"
+			user.First_name = "Madu"
+			user.Last_name = "Stanley"
 		
-		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt",  "hasError": false})
+		go helper.SendEmail(user.Email, templates.RegisterEmail(user.First_name + " " + user.Last_name), "Welcome To Gamelyd")
+
+		c.JSON(http.StatusOK, gin.H{"message": "request processed successfully",  "hasError": false})
 	}
 }
 
@@ -399,6 +469,20 @@ func Test() gin.HandlerFunc{
 		}
 
 		err := userCollection.FindOne(ctx, bson.M{"email":user.Email}).Decode(&foundUser)
+		if err != nil {
+			if err == mongo.ErrNoDocuments {
+				// No user found with the specified email
+				fmt.Println("User not found.")
+			} else {
+				// Handle other errors
+				fmt.Println("Error:", err.Error())
+			}
+		} else {
+			// User found and decoded successfully
+			fmt.Println("Found user:", foundUser)
+		}
+				
+		// fmt.Printf("%+v got a user!\n", foundUser)
 		defer cancel()
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{"message":"email is incorrect", "hasError": true})
@@ -410,7 +494,7 @@ func Test() gin.HandlerFunc{
 
 			passedtoken := token
 
-			helper.ForgotPasswordMail(*foundUser.Email, passedtoken, *foundUser.User_name)
+			helper.ForgotPasswordMail(*foundUser.Email, passedtoken, *foundUser.First_name + " " + *foundUser.Last_name)
 
 			c.JSON(http.StatusOK, gin.H{"message": "Check your email for reset link", "hasError": false,})
 		}

@@ -32,4 +32,5 @@ type Tournament struct{
 	PaymentChannel				string					`json:"PaymentChannel"`
 	Amount						int						`json:"Amount"`
 	RegistrationAmount			int						`json:"RegistrationAmount"`
+	Note						string					`json:"Note" validate:"required"`
 }

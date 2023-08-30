@@ -15,9 +15,11 @@ func UserRoutes(incomingRoutes *gin.Engine){
 	incomingRoutes.GET("/users/:user_id", controller.GetUser())
 	incomingRoutes.POST("/users/changePassword/:user_id", controller.ChangePassword())
 	incomingRoutes.POST("/users/editUser/:user_id", controller.UpdateUser())
-	incomingRoutes.POST("/users/reset/", controller.ResetPassword())
+	incomingRoutes.POST("/users/reset", controller.ResetPassword())
 	incomingRoutes.GET("/users/delete/:user_id", controller.DeleteUser())
-	incomingRoutes.GET("/users/tournaments/:id", controller.ListUserTournament())
+	incomingRoutes.GET("/users/tournaments/:id/:page", controller.ListUserTournament())
+	incomingRoutes.GET("/users/tournaments/:id/limit", controller.ListUserTournamentLimit())
+	incomingRoutes.GET("/users/search/:search/:page", controller.SearchUsers())
 	
 
 }

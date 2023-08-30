@@ -1,8 +1,7 @@
 package templates
 
 import (
-  "fmt"
-  "strings"
+	"strings"
 )
 
 func ForgotPassword(token string, name string) string {
@@ -31,7 +30,7 @@ func ForgotPassword(token string, name string) string {
                       <tr>
                           <td style="text-align:center;">
                             <a href="https://rakeshmandal.com" title="logo" target="_blank">
-                              <img width="60" src="https://i.ibb.co/hL4XZp2/android-chrome-192x192.png" title="logo" alt="logo">
+                              <img width="200" src="https://gamelyd.co/images/logos/logo.png" title="logo" alt="logo">
                             </a>
                           </td>
                       </tr>
@@ -56,8 +55,8 @@ func ForgotPassword(token string, name string) string {
                                               password has been generated for you. To reset your password, click the
                                               following link and follow the instructions.
                                           </p>
-                                          <a href="https://joyrideapp.herokuapp.com/auth/reset-password/[[token]]"
-                                              style="background:#20e277;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;">Reset
+                                          <a href="https://gamelyd.co/resetpassword/[[token]]"
+                                              style="background:#0BC0B4;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;">Reset
                                               Password</a>
                                       </td>
                                   </tr>
@@ -70,10 +69,42 @@ func ForgotPassword(token string, name string) string {
                           <td style="height:20px;">&nbsp;</td>
                       </tr>
                       <tr>
-                          <td style="text-align:center;">
-                              <p style="font-size:14px; color:rgba(69, 80, 86, 0.7411764705882353); line-height:18px; margin:0 0 0;">&copy; <strong>www.rakeshmandal.com</strong></p>
-                          </td>
-                      </tr>
+                      <td style="text-align: center">
+                        <p
+                          style="
+                            font-size: 14px;
+                            color: rgba(69, 80, 86, 0.7411764705882353);
+                            line-height: 18px;
+                            margin: 0 0 0;
+                          "
+                        >
+                          <stron>Gamelyd is an online plartform that helps in organizing game
+                            tournaments in diffrent modes, Gamelyd simplifies and makes it easy for
+                            people in diffrent locations to meet and play tournaments together.</strong>
+                        </p>
+                        <p style="
+                          font-size: 14px;
+                          color: rgba(69, 80, 86, 0.7411764705882353);
+                          line-height: 18px;
+                          margin: 0 0 0;
+                        ">If you did not initiate this email please contact us on contact@gamelyd.com or
+                        visit our<a href="https://gamelyd.co/"> website</a></p>
+                        <div style="
+        
+                        margin: 20px 0;
+                      "></div>
+                        <p
+                          style="
+                            font-size: 14px;
+                            color: rgba(69, 80, 86, 0.7411764705882353);
+                            line-height: 18px;
+                            margin: 0 0 0;
+                          "
+                        >
+                          &copy; <strong>www.gamelyd.co</strong>
+                        </p>
+                      </td>
+                    </tr>
                       <tr>
                           <td style="height:80px;">&nbsp;</td>
                       </tr>
@@ -95,7 +126,6 @@ func ForgotPassword(token string, name string) string {
   n1 := 1
   text = strings.Replace(text, replace1, newValue1, n1)
 
-  fmt.Println("Result   String : ", text)
 
   return text
 }
