@@ -469,6 +469,20 @@ func Test() gin.HandlerFunc{
 		}
 
 		err := userCollection.FindOne(ctx, bson.M{"email":user.Email}).Decode(&foundUser)
+		if err != nil {
+			if err == mongo.ErrNoDocuments {
+				// No user found with the specified email
+				fmt.Println("User not found.")
+			} else {
+				// Handle other errors
+				fmt.Println("Error:", err.Error())
+			}
+		} else {
+			// User found and decoded successfully
+			fmt.Println("Found user:", foundUser)
+		}
+				
+		// fmt.Printf("%+v got a user!\n", foundUser)
 		defer cancel()
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{"message":"email is incorrect", "hasError": true})
