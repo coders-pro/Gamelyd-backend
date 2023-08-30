@@ -307,6 +307,37 @@ func GetTournamentsByMode() gin.HandlerFunc{
 		c.JSON(http.StatusOK, gin.H{"message": "request processed successfullt", "tournaments":data, "hasError": false})}
 }
 
+func GetTournamentByType() gin.HandlerFunc{
+	return func(c *gin.Context) {
+        paymentType := c.Param("paymentType")
+
+        fmt.Println("type is", paymentType)
+
+        var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+        defer cancel()
+
+        pipeline := []bson.M{
+            {"$match": bson.M{"payment": paymentType}},
+            {"$limit": 10}, // Limit the number of documents to 3
+        }
+
+        cursor, err := tournamentCollection.Aggregate(ctx, pipeline)
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "hasError": true})
+            return
+        }
+
+        var fil []bson.M
+
+        if err := cursor.All(ctx, &fil); err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "hasError": true})
+            return
+        }
+
+        c.JSON(http.StatusOK, gin.H{"message": "request processed successfully", "tournament": fil, "hasError": false})
+    }
+}
+
 func UpdateTournament() gin.HandlerFunc{
 	return func(c *gin.Context){
 		id := c.Param("id")
