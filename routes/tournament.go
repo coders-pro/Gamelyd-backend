@@ -6,12 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func TournamentRoutes(incomingRoutes *gin.Engine){
+func TournamentRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.Use(middleware.Authenticate())
 	incomingRoutes.POST("/tournament/save", controller.SaveTournament())
 	incomingRoutes.GET("/tournaments/:search/:page", controller.GetTournaments())
 	incomingRoutes.GET("/tournament/:id", controller.GetTournament())
-	incomingRoutes.GET("tournament/mode/:paymentType/limit", controller.GetTournamentByType())
+	// incomingRoutes.GET("tournament/mode/:paymentType/limit", controller.GetTournamentByType())
 	incomingRoutes.GET("/tournament/delete/:id", controller.DeleteTournament())
 	incomingRoutes.GET("/tournament/suspend/:id", controller.SuspendTournament())
 	incomingRoutes.POST("/tournament/update/:id", controller.UpdateTournament())
