@@ -25,13 +25,6 @@ import (
 
 var drawCollection *mongo.Collection = database.OpenCollection(database.Client, "draw")
 
-// get registered teams
-// format and update
-// update many,
-// for second and next stages get from teams from winners
-// send emails as well
-// for first draw make sure to update start to true
-
 func Draw() gin.HandlerFunc{
 	return func(c *gin.Context){
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
@@ -250,8 +243,6 @@ func Draw() gin.HandlerFunc{
 						go helper.SendEmail(request.Team2.Players[i].Email , templates.DrawTournament(request.Team2.Players[i].UserName, "", request.TournamentId), "Tournament Draw")
 					}	
 				} else {
-					// If there's an odd number of elements, add the last element as a single-object pair
-					// pairs = append(pairs, []MyObject{newDraw[i]})
 					request2.Team1 =  newDraw[i]
 					request2.Team2.Players = nil
 					request2.Winner = "Team1"
@@ -269,39 +260,7 @@ func Draw() gin.HandlerFunc{
 				}
 				
 			}
-		// 	for i := 0; i < len(newDraw); i++ {
-
-		// 		request.Team1 = newDraw[i - 1]
-		// 		request.Team2 = newDraw[i - 0]	
-				
-		// 		request.Stage = draw.Stage
-		// 		request.ID = primitive.NewObjectID()
-		// 		request.TournamentId = draw.TournamentId
-		// 		request.DrawId = request.ID.Hex()
-		// 		request.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-		// 		request.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-		// 		submitData = append(submitData, request)
-		// 		for i, _ := range request.Team1.Players {
-		// 			go helper.SendEmail(request.Team1.Players[i].Email , templates.DrawTournament(request.Team1.Players[i].UserName, "", request.TournamentId), "Tournament Draw")
-		// 		}
-		// 		for i, _ := range request.Team2.Players {
-		// 			go helper.SendEmail(request.Team2.Players[i].Email , templates.DrawTournament(request.Team2.Players[i].UserName, "", request.TournamentId), "Tournament Draw")
-		// 		}									
-						
-		// }	
 	}
-	// if len(newDraw)%2 != 0 {
-	// 	if len(newDraw) != 2 {
-	// 		request2.Team1 =  newDraw[len(newDraw) - 1]
-	// 		request2.Team2.Players = nil
-	// 		request2.Winner = "Team1"
-			
-
-	// 		submitData = append(submitData, request2)
-	// 	}
-		
-	// }
-
 		var newAll []interface{}
 
 		for _, t := range submitData {
