@@ -696,3 +696,7 @@ func RemoveUser() gin.HandlerFunc {
 	}
 
 }
+
+func InviteUser() gin.HandlerFunc {
+	return
+}
