@@ -25,7 +25,12 @@ import (
 
 var drawCollection *mongo.Collection = database.OpenCollection(database.Client, "draw")
 
-
+// get registered teams
+// format and update
+// update many,
+// for second and next stages get from teams from winners
+// send emails as well
+// for first draw make sure to update start to true
 
 func Draw() gin.HandlerFunc{
 	return func(c *gin.Context){
@@ -52,7 +57,7 @@ func Draw() gin.HandlerFunc{
 		after := options.After
 		opt := options.FindOneAndUpdateOptions{
 			ReturnDocument: &after,
-			Upsert:         &upsert,
+			Upsert:         &upsert, 
 		}
 
 		result := tournamentCollection.FindOneAndUpdate(ctx, filter, update, &opt)
@@ -207,7 +212,6 @@ func Draw() gin.HandlerFunc{
 			newDraw[0] = newDraw[len(newDraw) - 1]
 			newDraw[len(newDraw) - 1] = temp
 		}
-		newCount := 1
 
 		if len(newDraw) == 2 {
 			request.Team1 = newDraw[0]
@@ -227,51 +231,76 @@ func Draw() gin.HandlerFunc{
 			}
 			submitData = append(submitData, request)			
 		}else {
-			for newCount < len(newDraw) {
-				if newCount%2 == 0 {
-						request.Team1 = newDraw[newCount - 2]
-						request.Team2 = newDraw[newCount - 1]	
-						
-						request.Stage = draw.Stage
-						request.ID = primitive.NewObjectID()
-						request.TournamentId = draw.TournamentId
-						request.DrawId = request.ID.Hex()
-						request.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-						request.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-						submitData = append(submitData, request)
-						for i, _ := range request.Team1.Players {
-							go helper.SendEmail(request.Team1.Players[i].Email , templates.DrawTournament(request.Team1.Players[i].UserName, "", request.TournamentId), "Tournament Draw")
-						}
-						for i, _ := range request.Team2.Players {
-							go helper.SendEmail(request.Team2.Players[i].Email , templates.DrawTournament(request.Team2.Players[i].UserName, "", request.TournamentId), "Tournament Draw")
-						}									
-						newCount++
+			for i := 0; i < len(newDraw); i += 2 {
 				
-				}else {
-					newCount++
+				if i+1 < len(newDraw) {
+					request.Team1 = newDraw[i]
+					request.Team2 = newDraw[i + 1]
+					request.Stage = draw.Stage
+					request.ID = primitive.NewObjectID()
+					request.TournamentId = draw.TournamentId
+					request.DrawId = request.ID.Hex()
+					request.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+					request.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+					submitData = append(submitData, request)
+					for i, _ := range request.Team1.Players {
+						go helper.SendEmail(request.Team1.Players[i].Email , templates.DrawTournament(request.Team1.Players[i].UserName, "", request.TournamentId), "Tournament Draw")
+					}
+					for i, _ := range request.Team2.Players {
+						go helper.SendEmail(request.Team2.Players[i].Email , templates.DrawTournament(request.Team2.Players[i].UserName, "", request.TournamentId), "Tournament Draw")
+					}	
+				} else {
+					// If there's an odd number of elements, add the last element as a single-object pair
+					// pairs = append(pairs, []MyObject{newDraw[i]})
+					request2.Team1 =  newDraw[i]
+					request2.Team2.Players = nil
+					request2.Winner = "Team1"
+					request2.Stage = draw.Stage
+					request2.Team2.TeamName = "Automatic Qualification"
+					request2.TournamentId = draw.TournamentId
+					request2.ID = primitive.NewObjectID()
+					request2.DrawId = request2.ID.Hex()
+					request2.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+					request2.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+					submitData = append(submitData, request2)
+					for i, _ := range request.Team1.Players {
+						go helper.SendEmail(request.Team1.Players[i].Email , templates.DrawTournament(request.Team1.Players[i].UserName, "", request.TournamentId), "Tournament Draw")
+					}
 				}
-		}	
-	}
-	if len(newDraw)%2 != 0 {
-		if len(newDraw) != 2 {
-			request2.Team1 =  newDraw[len(newDraw) - 1]
-			request2.Team2.Players = nil
-			request2.Winner = "Team1"
-			request2.Stage = draw.Stage
-			request2.Team2.TeamName = "Automatic Qualification"
-			request2.TournamentId = draw.TournamentId
-			request2.ID = primitive.NewObjectID()
-			request2.DrawId = request2.ID.Hex()
-			request2.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-			request2.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-			for i, _ := range request.Team1.Players {
-				go helper.SendEmail(request.Team1.Players[i].Email , templates.DrawTournament(request.Team1.Players[i].UserName, "", request.TournamentId), "Tournament Draw")
+				
 			}
+		// 	for i := 0; i < len(newDraw); i++ {
 
-			submitData = append(submitData, request2)
-		}
-		
+		// 		request.Team1 = newDraw[i - 1]
+		// 		request.Team2 = newDraw[i - 0]	
+				
+		// 		request.Stage = draw.Stage
+		// 		request.ID = primitive.NewObjectID()
+		// 		request.TournamentId = draw.TournamentId
+		// 		request.DrawId = request.ID.Hex()
+		// 		request.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+		// 		request.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+		// 		submitData = append(submitData, request)
+		// 		for i, _ := range request.Team1.Players {
+		// 			go helper.SendEmail(request.Team1.Players[i].Email , templates.DrawTournament(request.Team1.Players[i].UserName, "", request.TournamentId), "Tournament Draw")
+		// 		}
+		// 		for i, _ := range request.Team2.Players {
+		// 			go helper.SendEmail(request.Team2.Players[i].Email , templates.DrawTournament(request.Team2.Players[i].UserName, "", request.TournamentId), "Tournament Draw")
+		// 		}									
+						
+		// }	
 	}
+	// if len(newDraw)%2 != 0 {
+	// 	if len(newDraw) != 2 {
+	// 		request2.Team1 =  newDraw[len(newDraw) - 1]
+	// 		request2.Team2.Players = nil
+	// 		request2.Winner = "Team1"
+			
+
+	// 		submitData = append(submitData, request2)
+	// 	}
+		
+	// }
 
 		var newAll []interface{}
 
