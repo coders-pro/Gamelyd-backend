@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -45,8 +44,6 @@ func GetNotifications() gin.HandlerFunc {
 
 		userID := c.Param("userID")
 		cursor, err := notificationsCollection.Find(ctx, gin.H{"user_id": userID})
-
-		fmt.Println(userID)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve notifications", "hasError": true})
