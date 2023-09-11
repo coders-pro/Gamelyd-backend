@@ -131,6 +131,7 @@ func Signup() gin.HandlerFunc {
 func Login() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
 		var user models.User
 		var foundUser models.User
 
@@ -140,9 +141,9 @@ func Login() gin.HandlerFunc {
 		}
 
 		err := userCollection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&foundUser)
-		defer cancel()
+
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"message": "email or password is incorrect", "hasError": true})
+			c.JSON(http.StatusNotFound, gin.H{"message": "email or password is incorrect", "error": err.Error(), "hasError": true})
 			return
 		}
 

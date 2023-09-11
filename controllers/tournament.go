@@ -706,8 +706,6 @@ func inviteUser(ctx context.Context, userId, tournamentId string, user *models.U
 	invitedTournament.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	invitedTournament.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 
-	fmt.Println(tournamentId, userId)
-
 	_, err := inviteTournamentCollection.InsertOne(ctx, invitedTournament)
 	if err != nil {
 		return err
@@ -717,12 +715,14 @@ func inviteUser(ctx context.Context, userId, tournamentId string, user *models.U
 
 	notificationMessage := fmt.Sprintf("You have been invited to %s tournament", *tournament.Name)
 
-	fmt.Println(notificationMessage)
-
 	notification.UserID = userId
 	notification.Message = notificationMessage
 
-	CreateNotificationLogic(notification)
+	_, err = CreateNotificationLogic(notification)
+
+	if err != nil {
+		return err
+	}
 	go helper.SendEmail(*user.Email, templates.TournamentInvite(*user.First_name+" "+*user.Last_name, tournamentId, *tournament.Name), "You have been Invited to a tournament")
 
 	return nil
@@ -762,8 +762,6 @@ func InviteUserToTournament() gin.HandlerFunc {
 				return
 			}
 		}
-
-		fmt.Println(userId, tournamentId, "first")
 
 		if err := inviteUser(ctx, userId, tournamentId, &user, &tournament); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "hasError": true, "message": "Item was not created"})
