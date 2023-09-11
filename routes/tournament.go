@@ -23,4 +23,5 @@ func TournamentRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.GET("/tournament/userRegisteredTournaments/:id/:page", controller.UserTournaments())
 	incomingRoutes.GET("/tournament/userRegisteredTournaments/:id/limit", controller.UserTournamentsLimit())
 	incomingRoutes.GET("/tournament/removeFromTournament/:userId/:tournamentId", controller.RemoveUser())
+	incomingRoutes.GET("/tournament/acceptInvite/:userId/:tournamentId", controller.AcceptInvite())
 }

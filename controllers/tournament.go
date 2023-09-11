@@ -698,21 +698,44 @@ func RemoveUser() gin.HandlerFunc {
 
 }
 
+func inviteUser(ctx context.Context, userId, tournamentId string, user *models.User, tournament *models.Tournament) error {
+	var invitedTournament models.InviteTournament
+
+	invitedTournament.Tournament_id = tournamentId
+	invitedTournament.User_id = userId
+	invitedTournament.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	invitedTournament.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+
+	fmt.Println(tournamentId, userId)
+
+	_, err := inviteTournamentCollection.InsertOne(ctx, invitedTournament)
+	if err != nil {
+		return err
+	}
+
+	var notification models.Notification
+
+	notificationMessage := fmt.Sprintf("You have been invited to %s tournament", *tournament.Name)
+
+	fmt.Println(notificationMessage)
+
+	notification.UserID = userId
+	notification.Message = notificationMessage
+
+	CreateNotificationLogic(notification)
+	go helper.SendEmail(*user.Email, templates.TournamentInvite(*user.First_name+" "+*user.Last_name, tournamentId, *tournament.Name), "You have been Invited to a tournament")
+
+	return nil
+}
+
 func InviteUserToTournament() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userId := c.Param("userID")
 		tournamentId := c.Param("tournamentID")
 
-		hexTournamentId, err := primitive.ObjectIDFromHex(tournamentId)
-
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid id parameter", "hasError": true})
-			return
-		}
 		hexUserId, err := primitive.ObjectIDFromHex(userId)
-
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid id parameter", "hasError": true})
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid tournament id parameter", "hasError": true})
 			return
 		}
 
@@ -721,54 +744,75 @@ func InviteUserToTournament() gin.HandlerFunc {
 
 		var tournament models.Tournament
 		err = tournamentCollection.FindOne(ctx, bson.M{"tournamentid": tournamentId}).Decode(&tournament)
-
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "hasError": true})
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "hasError": true})
 			return
 		}
 
-		var invitedTournament models.InviteTournament
+		var user models.User
+		err = userCollection.FindOne(ctx, bson.M{"_id": hexUserId}).Decode(&user)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "hasError": true})
+			return
+		}
 
-		if len(tournament.AcceptedInvites) > 0 {
-
-			for i := range tournament.AcceptedInvites {
-				if tournament.AcceptedInvites[i] == userId {
-
-					c.JSON(http.StatusInternalServerError, gin.H{"message": "User already invited", "hasError": true})
-					defer cancel()
-					return
-				} else {
-					invitedTournament.Tournament_id = hexTournamentId
-					invitedTournament.User_id = hexUserId
-					invitedTournament.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-					invitedTournament.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-					_, err := inviteTournamentCollection.InsertOne(ctx, tournament)
-					if err != nil {
-						msg := "item was not created"
-						c.JSON(http.StatusInternalServerError, gin.H{"message": msg, "hasError": true})
-						defer cancel()
-						return
-					}
-					c.JSON(http.StatusOK, gin.H{"message": "Invite sent successfully", "hasError": false})
-					defer cancel()
-					return
-				}
-			}
-		} else {
-			invitedTournament.Tournament_id = hexTournamentId
-			invitedTournament.User_id = hexUserId
-			invitedTournament.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-			invitedTournament.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-			_, err := inviteTournamentCollection.InsertOne(ctx, tournament)
-			if err != nil {
-				msg := "item was not created"
-				c.JSON(http.StatusInternalServerError, gin.H{"message": msg, "hasError": true})
-				defer cancel()
+		for _, invite := range tournament.AcceptedInvites {
+			if invite == userId {
+				c.JSON(http.StatusInternalServerError, gin.H{"message": "User already invited to tournament", "hasError": true})
 				return
 			}
-			c.JSON(http.StatusOK, gin.H{"message": "Invite sent successfully", "hasError": false})
+		}
+
+		fmt.Println(userId, tournamentId, "first")
+
+		if err := inviteUser(ctx, userId, tournamentId, &user, &tournament); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "hasError": true, "message": "Item was not created"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Invite sent successfully", "hasError": false})
+	}
+}
+
+func AcceptInvite() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		userId := c.Param("userId")
+		tournamentId := c.Param("tournamentId")
+
+		fmt.Println(userId, tournamentId)
+
+		hexTournamentId, err := primitive.ObjectIDFromHex(tournamentId)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid tournament id parameter", "hasError": true})
+			return
+		}
+
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+
+		var tournament models.Tournament
+		err = tournamentCollection.FindOne(ctx, bson.M{"tournamentid": tournamentId}).Decode(&tournament)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "hasError": true})
+			return
+		}
+
+		invitedUsers := tournament.AcceptedInvites
+
+		invitedUsers = append(invitedUsers, userId)
+
+		update := bson.D{{"$set", bson.D{{"AcceptedInvites", invitedUsers}}}}
+
+		result, err := tournamentCollection.UpdateByID(ctx, hexTournamentId, update)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "hasError": true})
+
 			defer cancel()
 			return
 		}
+
+		c.JSON(http.StatusOK, gin.H{"hasError": false, "data": result})
 	}
 }

@@ -16,6 +16,19 @@ import (
 
 var notificationsCollection *mongo.Collection = database.OpenCollection(database.Client, "notification")
 
+func CreateNotificationLogic(notification models.Notification) (string, error) {
+	notification.Timestamp = time.Now()
+	notification.IsRead = false
+
+	_, err := notificationsCollection.InsertOne(context.TODO(), notification)
+
+	if err != nil {
+		return "", err
+	}
+
+	return "Notification Created Successfully", nil
+}
+
 func CreateNotification() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var notification models.Notification
@@ -24,16 +37,13 @@ func CreateNotification() gin.HandlerFunc {
 			return
 		}
 
-		notification.Timestamp = time.Now()
-		notification.IsRead = false
+		msg, err := CreateNotificationLogic(notification)
 
-		_, err := notificationsCollection.InsertOne(nil, notification)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create notification", "hasError": true})
-			return
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "hasError": true})
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "Notification created successfully!"})
+		c.JSON(http.StatusOK, gin.H{"message": msg, "hasError": false})
 
 	}
 }
