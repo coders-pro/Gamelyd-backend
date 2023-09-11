@@ -139,52 +139,6 @@ func Draw() gin.HandlerFunc{
 				
 			}
 			
-			
-			// for count <= len(fil) {
-			// 		if count%2 == 0 {
-			// 			Team1.Players = fil[count - 2].Players
-			// 			Team1.TeamName = fil[count - 2].TeamName
-		
-			// 			Team2.Players = fil[count - 1].Players
-			// 			Team2.TeamName = fil[count - 1].TeamName
-		
-			// 			draw.Team1 = Team1
-			// 			draw.Team2 = Team2
-			// 			draw.ID = primitive.NewObjectID()
-			// 			draw.Stage = 1
-			// 			draw.DrawId = draw.ID.Hex()
-			// 			formatData = append(formatData, draw)
-			// 			for i, _ := range draw.Team1.Players {
-			// 				go helper.SendEmail(draw.Team1.Players[i].Email , templates.DrawTournament(draw.Team1.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
-			// 			}
-			// 			for i, _ := range draw.Team2.Players {
-			// 				go helper.SendEmail(draw.Team2.Players[i].Email , templates.DrawTournament(draw.Team2.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
-			// 			}
-			// 			count++
-		
-			// 		}else {
-			// 			count++
-			// 		}	
-				
-			// }
-
-			// if len(fil)%2 != 0 {
-			// 	Team1.Players = fil[len(fil) - 1].Players
-			// 	Team1.TeamName = fil[len(fil) - 1].TeamName
-
-			// 	Team2.TeamName = "Automatic Qualification"
-			// 	Team2.Players = nil
-			// 	draw.Stage = 1
-			// 	draw.Team1 = Team1
-			// 	draw.Team2 = Team2
-			// 	draw.Winner = "Team1"
-			// 	draw.ID = primitive.NewObjectID()
-			// 	draw.DrawId = draw.ID.Hex()
-			// 	formatData = append(formatData, draw)
-			// 	for i, _ := range draw.Team1.Players {
-			// 		go helper.SendEmail(draw.Team1.Players[i].Email , templates.DrawTournament(draw.Team1.Players[i].UserName, "", draw.TournamentId), "Tournament Draw")
-			// 	}
-			// }
 			fmt.Println(reflect.TypeOf(allData))
 			for _, t := range formatData {
 				allData = append(allData, t)
