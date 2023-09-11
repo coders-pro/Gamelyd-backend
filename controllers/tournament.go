@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -706,6 +707,11 @@ func inviteUser(ctx context.Context, userId, tournamentId string, user *models.U
 	invitedTournament.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	invitedTournament.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 
+	if user.Email == nil || user.First_name == nil || user.Last_name == nil || tournament.Name == nil {
+
+		return errors.New("email or firstname or lastname doesn't exist")
+	}
+
 	_, err := inviteTournamentCollection.InsertOne(ctx, invitedTournament)
 	if err != nil {
 		return err
@@ -719,7 +725,6 @@ func inviteUser(ctx context.Context, userId, tournamentId string, user *models.U
 	notification.Message = notificationMessage
 
 	_, err = CreateNotificationLogic(notification)
-
 	if err != nil {
 		return err
 	}
