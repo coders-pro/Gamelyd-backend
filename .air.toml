@@ -1,0 +1,13 @@
+# .air.toml
+
+# Watching .go and .tpl files recursively
+# You can also add more file extensions here
+[build]
+directories = ["."]
+
+# Choose the command to run your server
+# Replace "yourapp" with the name of your main Go file
+cmd = "go run main.go"
+
+# Delay before restart (default is 1 second)
+delay = 1000
