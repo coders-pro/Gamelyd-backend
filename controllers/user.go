@@ -143,14 +143,14 @@ func Login() gin.HandlerFunc {
 		err := userCollection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&foundUser)
 
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"message": "email or password is incorrect", "error": err.Error(), "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message": "email or password is incorrect", "error": err.Error(), "hasError": true})
 			return
 		}
 
 		passwordIsValid, msg := VerifyPassword(*user.Password, *foundUser.Password)
 		defer cancel()
 		if passwordIsValid != true {
-			c.JSON(http.StatusNotFound, gin.H{"message": msg, "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message": msg, "hasError": true})
 			return
 		}
 
