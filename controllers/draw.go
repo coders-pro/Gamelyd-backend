@@ -17,6 +17,8 @@ import (
 	"github.com/gin-gonic/gin"
 
 	// "go.mongodb.org/mongo-driver/bson"
+	"log"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -24,6 +26,7 @@ import (
 )
 
 var drawCollection *mongo.Collection = database.OpenCollection(database.Client, "draw")
+// var tournamentCollection *mongo.Collection = database.OpenCollection(database.Client, "tournament")
 
 func Draw() gin.HandlerFunc{
 	return func(c *gin.Context){
@@ -87,10 +90,12 @@ func Draw() gin.HandlerFunc{
 			Team1 := models.Teams{
 				TeamName: "",
 				Players: nil,
+				Icon: "",
 			}
 			Team2 := models.Teams{
 				TeamName: "",
 				Players: nil,
+				Icon: "",
 			}
 			fmt.Println(reflect.TypeOf(Team1))
 			
@@ -103,9 +108,12 @@ func Draw() gin.HandlerFunc{
 				if i+1 < len(fil) {
 					Team1.Players = fil[i].Players
 					Team1.TeamName = fil[i].TeamName
+					Team1.Icon = fil[i].Icon
+					
 	
 					Team2.Players = fil[i + 1].Players
 					Team2.TeamName = fil[i + 1].TeamName
+					Team2.Icon = fil[i + 1].Icon
 	
 					draw.Team1 = Team1
 					draw.Team2 = Team2
@@ -122,8 +130,10 @@ func Draw() gin.HandlerFunc{
 				} else {
 					Team1.Players = fil[i].Players
 					Team1.TeamName = fil[i].TeamName
+					Team1.Icon = fil[i].Icon
 
 					Team2.TeamName = "Automatic Qualification"
+					Team2.Icon = ""
 					Team2.Players = nil
 					draw.Stage = 1
 					draw.Team1 = Team1
@@ -522,9 +532,12 @@ func AddScore() gin.HandlerFunc{
 	return func(c *gin.Context){
 		id := c.Param("drawId")
 		type Score struct {
-			Team1 	interface{}			`json:"Team1" validate:"required"`
-			Team2 	interface{}			`json:"Team2" validate:"required"`
-			Winner 	string		`json:"Winner" validate:"required"`
+			Team1 			interface{}			`json:"Team1" validate:"required"`
+			Team2 			interface{}			`json:"Team2" validate:"required"`
+			Winner 			string				`json:"Winner" validate:"required"`
+			TournamentId 	string				`json:"TournamentId" validate:"required"`
+			WinnerTeam		interface{}			`json:"WinnerTeam" validate:"required"`
+			IsFinal			string				`json:"IsFinal" validate:"required"`
 		}
 		var data Score
 		
@@ -543,11 +556,12 @@ func AddScore() gin.HandlerFunc{
 			defer cancel()
 			return
 		}
+		log.Println("TournamentId:", data.WinnerTeam)
 
-		filter := bson.M{"drawid": id}
+		filtert := bson.M{"tournamentid": data.TournamentId}
 
-		update := bson.M{
-			"$set": bson.M{"Team1Score": data.Team1 , "Team2Score": data.Team2, "Winner": data.Winner, "winner": data.Winner},
+		updatet := bson.M{
+			"$set": bson.M{"Winner": data.WinnerTeam},
 		}
 
 		upsert := true
@@ -556,6 +570,26 @@ func AddScore() gin.HandlerFunc{
 			ReturnDocument: &after,
 			Upsert:         &upsert,
 		}
+
+		if data.IsFinal == "true" {
+			resultT := tournamentCollection.FindOneAndUpdate(ctx, filtert, updatet, &opt)
+
+			if resultT.Err() != nil {
+				c.JSON(http.StatusOK, gin.H{"message": validationErr.Error(), "hasError": true})
+				defer cancel()
+				return
+			}
+		}
+
+		
+
+		filter := bson.M{"drawid": id}
+
+		update := bson.M{
+			"$set": bson.M{"Team1Score": data.Team1 , "Team2Score": data.Team2, "Winner": data.Winner, "winner": data.Winner},
+		}
+
+		
 
 		result := drawCollection.FindOneAndUpdate(ctx, filter, update, &opt)
 		if result.Err() != nil {
@@ -597,6 +631,7 @@ func AddLink() gin.HandlerFunc{
 		update := bson.M{
 			"$set": bson.M{"Link": data.Link},
 		}
+
 
 		upsert := true
 		after := options.After

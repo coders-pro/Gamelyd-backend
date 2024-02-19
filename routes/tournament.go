@@ -18,7 +18,7 @@ func TournamentRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("/tournament/update/:id", controller.UpdateTournament())
 	incomingRoutes.GET("/tournament/participants/:id", controller.ListPartTournament())
 	incomingRoutes.POST("/tournament/register/:tournamentId", controller.RegisterTournament())
-	incomingRoutes.GET("/tournament/mode/:paymentMode/:page", controller.GetTournamentsByMode())
+	incomingRoutes.GET("/tournament/mode/:paymentMode/:tournamentType/:page", controller.GetTournamentsByMode())
 	incomingRoutes.GET("/tournament/mode/:paymentMode/limit", controller.GetTournamentsByModeLimit())
 	incomingRoutes.GET("/tournament/userRegisteredTournaments/:id/:page", controller.UserTournaments())
 	incomingRoutes.GET("/tournament/userRegisteredTournaments/:id/limit", controller.UserTournamentsLimit())
