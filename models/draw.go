@@ -13,8 +13,8 @@ type  Player struct {
 }
 
 type  Teams struct {
-	TeamName				string					`json:"TeamName" validate:"required"`
-	Players					[]Player				`json:"Players" validate:"required"`
+	TeamName				string					`json:"TeamName"`
+	Players					[]Player				`json:"Players"`
 	Icon					string					`json:"Icon"`
 }
 
