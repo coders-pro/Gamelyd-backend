@@ -15,6 +15,7 @@ type  Player struct {
 type  Teams struct {
 	TeamName				string					`json:"TeamName" validate:"required"`
 	Players					[]Player				`json:"Players" validate:"required"`
+	Icon					string					`json:"Icon"`
 }
 
 type  BRTeams struct {

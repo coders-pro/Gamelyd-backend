@@ -366,21 +366,22 @@ func GetTournaments() gin.HandlerFunc {
 func GetTournamentsByMode() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		payment := c.Param("paymentMode")
+		Ttype := c.Param("tournamentType")
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
-
+		// fmt.Printf("Hello, %s!\n", Ttype)
 		var perPage int64 = 15
 		page, err := strconv.Atoi(c.Param("page"))
 
 		if page == 0 || page < 1 {
 			page = 1
 		}
-		total, _ := tournamentCollection.CountDocuments(ctx, bson.M{"payment": payment, "tournamenttype": "PUBLIC"})
+		total, _ := tournamentCollection.CountDocuments(ctx, bson.M{"payment": payment, "tournamenttype": "PUBLIC", "tournamentmode": Ttype})
 
 		myOptions := options.Find()
 		myOptions.SetSort(bson.M{"$natural": -1})
 		myOptions.SetLimit(perPage)
 		myOptions.SetSkip((int64(page) - 1) * int64(perPage))
-		result, err := tournamentCollection.Find(ctx, bson.M{"payment": payment, "tournamenttype": "PUBLIC"}, myOptions)
+		result, err := tournamentCollection.Find(ctx, bson.M{"payment": payment, "tournamenttype": "PUBLIC", "tournamentmode": Ttype}, myOptions)
 		defer cancel()
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{"message": "error occured while listing tournaments", "hasError": true})
@@ -599,7 +600,7 @@ func UserTournamentsLimit() gin.HandlerFunc {
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 
 		myOptions := options.Find()
-		myOptions.SetLimit(7)
+		myOptions.SetLimit(6)
 		myOptions.SetSort(bson.M{"$natural": -1})
 		result, err := registerTournamentCollection.Find(ctx, bson.M{"players.user_id": id}, myOptions)
 
