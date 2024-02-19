@@ -6,11 +6,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func TournamentRoutes(incomingRoutes *gin.Engine){
+func TournamentRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.Use(middleware.Authenticate())
 	incomingRoutes.POST("/tournament/save", controller.SaveTournament())
 	incomingRoutes.GET("/tournaments/:search/:page", controller.GetTournaments())
+	incomingRoutes.GET("/tournament/inviteUser/:userID/:tournamentID", controller.InviteUserToTournament())
 	incomingRoutes.GET("/tournament/:id", controller.GetTournament())
+	// incomingRoutes.GET("tournament/mode/:paymentType/limit", controller.GetTournamentByType())
 	incomingRoutes.GET("/tournament/delete/:id", controller.DeleteTournament())
 	incomingRoutes.GET("/tournament/suspend/:id", controller.SuspendTournament())
 	incomingRoutes.POST("/tournament/update/:id", controller.UpdateTournament())
@@ -21,5 +23,5 @@ func TournamentRoutes(incomingRoutes *gin.Engine){
 	incomingRoutes.GET("/tournament/userRegisteredTournaments/:id/:page", controller.UserTournaments())
 	incomingRoutes.GET("/tournament/userRegisteredTournaments/:id/limit", controller.UserTournamentsLimit())
 	incomingRoutes.GET("/tournament/removeFromTournament/:userId/:tournamentId", controller.RemoveUser())
-
+	incomingRoutes.GET("/tournament/acceptInvite/:userId/:tournamentId", controller.AcceptInvite())
 }
