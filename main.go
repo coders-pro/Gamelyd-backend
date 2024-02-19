@@ -45,3 +45,6 @@ func main() {
 
 	router.Run(":" + port)
 }
+
+// mongodb+srv://<username>:<password>@cluster0.xjybm.mongodb.net/?retryWrites=true&w=majority
+// mongodb+srv://munachiso1:munachiso1@munachiso.ady6z.mongodb.net/proshop?retryWrites=true&w=majority
