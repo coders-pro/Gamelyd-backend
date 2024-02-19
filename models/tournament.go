@@ -34,4 +34,6 @@ type Tournament struct {
 	RegistrationAmount int                `json:"RegistrationAmount"`
 	Note               string             `json:"Note" validate:"required"`
 	AcceptedInvites    []string           `json:"AcceptedInvites"`
+	Platform    	   string             `json:"Platform"`
+	Winner    	   	   Teams        	  `json:"Winner"`
 }

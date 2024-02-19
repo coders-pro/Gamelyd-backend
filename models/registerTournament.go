@@ -10,6 +10,7 @@ type  Team struct {
 	UserName		string					`json:"UserName" validate:"required"`
 	GameUserName	string					`json:"GameUserName" validate:"required"`
 	User_id			string					`json:"User_id" validate:"required"`
+	Email			string					`json:"Email" validate:"required"`
 }
 
 type RegisterTournament struct{
@@ -26,4 +27,5 @@ type RegisterTournament struct{
 	RefNumber				string					`json:"RefNumber"`
 	PaymentChannel			string					`json:"PaymentChannel"`
 	Amount					int						`json:"Amount"`
+	Icon					string					`json:"Icon" validate:"required"`
 }
