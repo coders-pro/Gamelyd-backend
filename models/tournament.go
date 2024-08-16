@@ -36,4 +36,5 @@ type Tournament struct {
 	AcceptedInvites    []string           `json:"AcceptedInvites"`
 	Platform    	   string             `json:"Platform"`
 	Winner    	   	   Teams        	  `json:"Winner"`
+	Stage    	   	   int        	  	  `json:"Stage"`
 }

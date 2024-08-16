@@ -11,6 +11,7 @@ import (
 
 	"github.com/Gameware/database"
 	"github.com/Gameware/models"
+	"github.com/Gameware/queries"
 
 	helper "github.com/Gameware/helpers"
 	"github.com/Gameware/templates"
@@ -26,7 +27,98 @@ import (
 )
 
 var drawCollection *mongo.Collection = database.OpenCollection(database.Client, "draw")
-// var tournamentCollection *mongo.Collection = database.OpenCollection(database.Client, "tournament")
+
+func NewDraw() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		draw := models.Draw{}
+		allDraws := []models.Draw{}
+		teams := models.AllTeams{}
+
+
+		// bind tournament id from frontend to draw variable
+		if err := c.BindJSON(&draw); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "hasError": true})
+			return
+		}
+
+		tournament, err := queries.GetSingleTournamentQuery(draw.TournamentId)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to get tournament", "hasError": true})
+			return
+		}
+		if tournament.User_id != c.GetString("uid") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Only tournament creators can draw tournament", "hasError": true})
+			return
+		}
+
+		draw.InitDraw()
+		// run when this is the first for the tournament
+		if tournament.Stage == 0 {
+			registeredTeams, err := queries.GetRegisteredTeamsQuery(draw.TournamentId)
+
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to get teams", "hasError": true})
+				return
+			}
+			if len(registeredTeams) < 2 {
+				c.JSON(http.StatusBadRequest, gin.H{"message": "You can't draw with just one team", "hasError": true})
+				return
+			}
+			//extract and shuffle all registered teams
+			// make shuffling come from tournament setting (later)
+			teams = registeredTeams.ExtractTeam()
+			teams.Shuffle()
+		}else {
+			draws, err := queries.GetCurrentStageTeamsQuery(draw.TournamentId, tournament.Stage)
+
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to get teams", "hasError": true})
+				return
+			}
+			if len(draws) <= 1{
+				c.JSON(http.StatusBadRequest, gin.H{"message": "You can't draw with less than three teams", "hasError": true})
+				return
+			}
+			for _, draw := range draws {
+				if draw.Winner == "" && draw.Team2.TeamName != "Automatic Qualification" {
+					c.JSON(http.StatusBadRequest, gin.H{"message": "Scores has not been added to all draws", "hasError": true})
+					return
+				}
+			}
+			teams = draws.ExtractTeam()
+		}
+		
+		paired := teams.Pair()
+
+		allDraws = paired.Generate1V1DrawsFromPairs(tournament)
+
+		startTournament := queries.StartTournamentQuery(draw.TournamentId)
+		if startTournament.Err() != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to start tournament", "hasError": true})
+			return
+		}
+
+		tournament.Stage = tournament.Stage + 1
+
+		_, err = queries.UpdateTournamentQuery(draw.TournamentId, tournament)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to draw teams", "hasError": true})
+			return
+		}
+
+		err = queries.SaveMultiDraws(allDraws)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to draw teams", "hasError": true})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Next draw processed successfully", "data": allDraws, "teams": teams, "hasError": false,})
+
+	}
+}
 
 func Draw() gin.HandlerFunc{
 	return func(c *gin.Context){

@@ -36,14 +36,12 @@ func GenerateAllTokens(email string, firstName string, lastName string, userType
 		Last_name: lastName,
 		Uid : uid,
 		User_type: userType,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(24)).Unix(),
-		},
+		StandardClaims: jwt.StandardClaims{},
 	}
 
 	refreshClaims := &SignedDetails{
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(168)).Unix(),
+			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(168)).Unix(), // 168 hours = 7 days
 		},
 	}
 
@@ -80,11 +78,11 @@ func ValidateToken(signedToken string) (claims *SignedDetails, msg string){
 		return
 	}
 
-	if claims.ExpiresAt < time.Now().Local().Unix(){
-		msg = fmt.Sprintf("token is expired")
-		msg = err.Error()
-		return
-	}
+	// if claims.ExpiresAt < time.Now().Local().Unix(){
+	// 	msg = fmt.Sprintf("token is expired")
+	// 	msg = err.Error()
+	// 	return
+	// }
 	return claims, msg
 }
 

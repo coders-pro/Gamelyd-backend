@@ -29,3 +29,19 @@ type RegisterTournament struct{
 	Amount					int						`json:"Amount"`
 	Icon					string					`json:"Icon" validate:"required"`
 }
+
+type AllRegTeams []RegisterTournament
+
+// extract all teams from registered teams list
+func (a AllRegTeams) ExtractTeam() AllTeams  {
+	teams := AllTeams{}
+
+	for _, oneTeam := range a {
+		team := Teams{}
+		team.Icon = oneTeam.Icon
+		team.Players = oneTeam.Players
+		team.TeamName = oneTeam.TeamName
+		teams = append(teams, team)
+	}
+	return teams
+}
