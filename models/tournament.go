@@ -13,7 +13,7 @@ type Tournament struct {
 	Icon               *string            `json:"icon" validate:"required,min=1,max=100"`
 	TournamentType     *string            `json:"TournamentType" validate:"required,eq=PUBLIC|eq=PRIVATE"`
 	Payment            *string            `json:"Payment" validate:"required,eq=FREE|eq=PAID|eq=SPONSORED"`
-	TournamentMode     *string            `json:"TournamentMode" validate:"required,eq=MULTIPLAYER|eq=BATTLEROYALE"`
+	TournamentMode     *string            `json:"TournamentMode" validate:"required,eq=MULTIPLAYER|eq=BATTLEROYALE|eq=GROUPS"`
 	TournamentSize     *int               `json:"TournamentSize" validate:"required"`
 	Team               *string            `json:"Team" validate:"required,eq=SINGLE|eq=DUO|eq=SQUAD"`
 	Shuffle            *string            `json:"Shuffle" validate:"required,eq=MANUAL|eq=AUTOMATIC"`
@@ -34,7 +34,15 @@ type Tournament struct {
 	RegistrationAmount int                `json:"RegistrationAmount"`
 	Note               string             `json:"Note" validate:"required"`
 	AcceptedInvites    []string           `json:"AcceptedInvites"`
-	Platform    	   string             `json:"Platform"`
-	Winner    	   	   Teams        	  `json:"Winner"`
-	Stage    	   	   int        	  	  `json:"Stage"`
+	Platform           string             `json:"Platform"`
+	Winner             Teams              `json:"Winner"`
+	Stage              int                `json:"Stage"`
+	Groups             TournamentGroups   `json:"Groups"`
 }
+
+type TournamentGroup struct {
+	Name  string
+	Teams []Teams
+}
+
+type TournamentGroups []TournamentGroup

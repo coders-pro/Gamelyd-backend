@@ -12,7 +12,7 @@ import (
 
 var registerTournamentCollection *mongo.Collection = database.OpenCollection(database.Client, "registerTournament")
 
-func GetRegisteredTeamsQuery(id string) (models.AllRegTeams, error)  {
+func GetRegisteredTeamsQuery(id string) (models.AllRegTeams, error) {
 
 	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
@@ -30,5 +30,4 @@ func GetRegisteredTeamsQuery(id string) (models.AllRegTeams, error)  {
 	}
 
 	return teams, err
-
 }
