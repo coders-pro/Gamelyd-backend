@@ -636,7 +636,7 @@ func RemoveUser() gin.HandlerFunc {
 		}
 
 		if tournament.Start == true {
-			c.JSON(http.StatusOK, gin.H{"message": "Tournament Ongoing or finished, unregistration not allowed", "hasError": true})
+			c.JSON(http.StatusOK, gin.H{"message": "Tournament Ongoing or finished, you are not allowed to leave", "hasError": true})
 			return
 		}
 
