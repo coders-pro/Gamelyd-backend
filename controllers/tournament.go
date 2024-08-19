@@ -833,14 +833,15 @@ func GroupTournament() gin.HandlerFunc {
 		}
 
 		tournamentParticipants, err := queries.GetRegisteredTeamsQuery(tournamentId)
+		minNoOfRegisteredTeams := 7
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "hasError": true})
 			return
 		}
 
-		if len(tournamentParticipants) < 7 {
-			c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Registered teams should not be below 7", "hasError": true})
+		if len(tournamentParticipants) < minNoOfRegisteredTeams {
+			c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Registered teams should not be below" + strconv.Itoa(minNoOfRegisteredTeams), "hasError": true})
 			return
 		}
 
@@ -870,7 +871,7 @@ func GroupTournament() gin.HandlerFunc {
 					} else {
 						teamGroups := groups[len(groups)-count].Teams
 
-						if len(teamGroups) > 3 {
+						if len(teamGroups) > minNumberPerGroup {
 							group.Teams = append(group.Teams, teamGroups[len(teamGroups)-1])
 							groups[len(groups)-count].Teams = teamGroups[:len(teamGroups)-1]
 						} else {
