@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/Gameware/database"
+	"github.com/Gameware/queries"
 	"github.com/Gameware/templates"
 
 	helper "github.com/Gameware/helpers"
@@ -818,5 +819,100 @@ func AcceptInvite() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{"hasError": false, "data": result})
+	}
+}
+
+func GroupTournament() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tournamentId := c.Param("tournamentId")
+		_, err := primitive.ObjectIDFromHex(tournamentId)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid tournament id parameter", "hasError": true})
+			return
+		}
+
+		tournamentParticipants, err := queries.GetRegisteredTeamsQuery(tournamentId)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "hasError": true})
+			return
+		}
+
+		if len(tournamentParticipants) < 7 {
+			c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Registered teams should not be below 7", "hasError": true})
+			return
+		}
+
+		var groups models.TournamentGroups
+
+		maxNumberPerGroup := 4
+		minNumberPerGroup := 3
+		groupNumber := int(math.Ceil(float64(len(tournamentParticipants)) / float64(maxNumberPerGroup)))
+		allTeams := tournamentParticipants.ExtractTeam()
+		allTeams.Shuffle()
+
+		for i := 0; i < groupNumber; i++ {
+
+			currentGroup := maxNumberPerGroup * (i + 1)
+
+			if i == groupNumber-1 {
+
+				group := models.TournamentGroup{
+					Name:  "Group" + " " + strconv.Itoa(i+1),
+					Teams: allTeams[currentGroup-maxNumberPerGroup:],
+				}
+
+				count := 1
+				for {
+					if len(group.Teams) >= minNumberPerGroup {
+						break
+					} else {
+						teamGroups := groups[len(groups)-count].Teams
+
+						if len(teamGroups) > 3 {
+							group.Teams = append(group.Teams, teamGroups[len(teamGroups)-1])
+							groups[len(groups)-count].Teams = teamGroups[:len(teamGroups)-1]
+						} else {
+							count++
+						}
+
+					}
+
+					if count > len(groups) {
+						break
+					}
+				}
+
+				groups = append(groups, group)
+
+			} else {
+				group := models.TournamentGroup{
+					Name:  "Group" + " " + strconv.Itoa(i+1),
+					Teams: allTeams[currentGroup-maxNumberPerGroup : currentGroup],
+				}
+
+				groups = append(groups, group)
+			}
+
+		}
+
+		tournament, err := queries.GetSingleTournamentQuery(tournamentId)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to get tournament", "hasError": true})
+			return
+		}
+
+		tournament.Groups = groups
+
+		_, err = queries.UpdateTournamentQuery(tournamentId, tournament)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to group teams", "hasError": true})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Tournament grouped successfully", "hasError": false})
 	}
 }
