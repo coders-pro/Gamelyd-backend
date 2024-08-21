@@ -1,6 +1,7 @@
 package models
 
 import (
+	"math/rand"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -28,6 +29,7 @@ type Tournament struct {
 	Link               string             `json:"Link"`
 	Date               string             `json:"Date" validate:"required"`
 	IsPaid             bool               `json:"IsPaid"`
+	IsDrawn            bool               `json:"IsDrawn"`
 	RefNumber          string             `json:"RefNumber"`
 	PaymentChannel     string             `json:"PaymentChannel"`
 	Amount             int                `json:"Amount"`
@@ -38,11 +40,44 @@ type Tournament struct {
 	Winner             Teams              `json:"Winner"`
 	Stage              int                `json:"Stage"`
 	Groups             TournamentGroups   `json:"Groups"`
+	PointSystem        PointSystem        `json:"PointSystem"`
+}
+
+type PointSystem struct {
+	Win  int `json:"Win"`
+	Draw int `json:"Draw"`
 }
 
 type TournamentGroup struct {
-	Name  string
+	Name  string `json:"GroupName"`
 	Teams []Teams
+	Fixtures
 }
 
+type Fixtures [][]Teams
+
 type TournamentGroups []TournamentGroup
+
+func (tg *TournamentGroup) PairTournamentGroups() TournamentGroup {
+	var fixtures Fixtures
+	for i := 0; i < len(tg.Teams); i++ {
+		for j := i + 1; j < len(tg.Teams); j++ {
+			fixtures = append(fixtures, []Teams{tg.Teams[i], tg.Teams[j]})
+		}
+	}
+
+	tg.Fixtures = fixtures
+	return *tg
+
+}
+
+func (a *TournamentGroup) Shuffle() {
+	source := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(source)
+
+	for i := range a.Fixtures {
+		newPosition := r.Intn(len(a.Fixtures) - 1)
+
+		a.Fixtures[i], a.Fixtures[newPosition] = a.Fixtures[newPosition], a.Fixtures[i]
+	}
+}
