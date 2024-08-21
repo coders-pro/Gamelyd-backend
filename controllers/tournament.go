@@ -919,7 +919,6 @@ func GroupTournament() gin.HandlerFunc {
 
 			for _, tournamentGroup := range groups {
 				tgs = append(tgs, tournamentGroup.PairTournamentGroups())
-				tournamentGroup.Shuffle()
 			}
 
 			tournament.Groups = tgs
