@@ -858,70 +858,13 @@ func GroupTournament() gin.HandlerFunc {
 			}
 
 			if len(tournamentParticipants) < minNoOfRegisteredTeams {
-				c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Registered teams should not be below" + strconv.Itoa(minNoOfRegisteredTeams), "hasError": true})
+				c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Registered teams should not be below" + " " + strconv.Itoa(minNoOfRegisteredTeams), "hasError": true})
 				return
 			}
 
-			var groups models.TournamentGroups
+			groups := models.GroupTeams(tournamentParticipants)
 
-			maxNumberPerGroup := 4
-			minNumberPerGroup := 3
-			groupNumber := int(math.Ceil(float64(len(tournamentParticipants)) / float64(maxNumberPerGroup)))
-			allTeams := tournamentParticipants.ExtractTeam()
-			allTeams.Shuffle()
-
-			for i := 0; i < groupNumber; i++ {
-
-				currentGroup := maxNumberPerGroup * (i + 1)
-
-				if i == groupNumber-1 {
-
-					group := models.TournamentGroup{
-						Name:  "Group" + " " + strconv.Itoa(i+1),
-						Teams: allTeams[currentGroup-maxNumberPerGroup:],
-					}
-
-					count := 1
-					for {
-						if len(group.Teams) >= minNumberPerGroup {
-							break
-						} else {
-							teamGroups := groups[len(groups)-count].Teams
-
-							if len(teamGroups) > minNumberPerGroup {
-								group.Teams = append(group.Teams, teamGroups[len(teamGroups)-1])
-								groups[len(groups)-count].Teams = teamGroups[:len(teamGroups)-1]
-							} else {
-								count++
-							}
-
-						}
-
-						if count > len(groups) {
-							break
-						}
-					}
-
-					groups = append(groups, group)
-
-				} else {
-					group := models.TournamentGroup{
-						Name:  "Group" + " " + strconv.Itoa(i+1),
-						Teams: allTeams[currentGroup-maxNumberPerGroup : currentGroup],
-					}
-
-					groups = append(groups, group)
-				}
-
-			}
-
-			var tgs models.TournamentGroups
-
-			for _, tournamentGroup := range groups {
-				tgs = append(tgs, tournamentGroup.PairTournamentGroups())
-			}
-
-			tournament.Groups = tgs
+			tournament.Groups = groups
 			tournament.IsDrawn = true
 
 			_, err = queries.UpdateTournamentQuery(tournamentId, tournament)
@@ -931,7 +874,7 @@ func GroupTournament() gin.HandlerFunc {
 				return
 			}
 
-			c.JSON(http.StatusOK, gin.H{"message": "Tournament grouped successfully", "hasError": tournament})
+			c.JSON(http.StatusOK, gin.H{"message": "Tournament grouped successfully", "hasError": groups})
 		} else {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Tournament is already drawn", "hasError": true})
 		}

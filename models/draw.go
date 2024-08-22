@@ -48,6 +48,7 @@ type Draw struct {
 	Team1Score   int                `json:"Team1Score"`
 	Team2Score   int                `json:"Team2Score"`
 	Link         string             `json:"Link"`
+	Group        string             `json:"Group"`
 	BRTeams      []BRTeams          `json:"BRTeams"`
 }
 

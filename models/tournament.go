@@ -1,7 +1,8 @@
 package models
 
 import (
-	"math/rand"
+	"math"
+	"strconv"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -50,34 +51,83 @@ type PointSystem struct {
 
 type TournamentGroup struct {
 	Name  string `json:"GroupName"`
-	Teams []Teams
-	Fixtures
+	Teams AllTeams
 }
-
-type Fixtures [][]Teams
 
 type TournamentGroups []TournamentGroup
 
-func (tg *TournamentGroup) PairTournamentGroups() TournamentGroup {
-	var fixtures Fixtures
+func (tg *TournamentGroup) PairTournamentGroups(tournamentId string) AllDraws {
+	var drawSlice AllDraws
+	var draw Draw
+
 	for i := 0; i < len(tg.Teams); i++ {
 		for j := i + 1; j < len(tg.Teams); j++ {
-			fixtures = append(fixtures, []Teams{tg.Teams[i], tg.Teams[j]})
+			draw.Team1 = tg.Teams[i]
+			draw.Team2 = tg.Teams[j]
+			draw.InitDraw()
+			draw.TournamentId = tournamentId
+			draw.Group = tg.Name
+			drawSlice = append(drawSlice, draw)
 		}
 	}
 
-	tg.Fixtures = fixtures
-	return *tg
+	return drawSlice
 
 }
 
-func (a *TournamentGroup) Shuffle() {
-	source := rand.NewSource(time.Now().UnixNano())
-	r := rand.New(source)
+func GroupTeams(tournamentParticipants AllRegTeams) TournamentGroups {
+	var groups TournamentGroups
 
-	for i := range a.Fixtures {
-		newPosition := r.Intn(len(a.Fixtures) - 1)
+	maxNumberPerGroup := 4
+	minNumberPerGroup := 3
+	groupNumber := int(math.Ceil(float64(len(tournamentParticipants)) / float64(maxNumberPerGroup)))
+	allTeams := tournamentParticipants.ExtractTeam()
+	allTeams.Shuffle()
 
-		a.Fixtures[i], a.Fixtures[newPosition] = a.Fixtures[newPosition], a.Fixtures[i]
+	for i := 0; i < groupNumber; i++ {
+
+		currentGroup := maxNumberPerGroup * (i + 1)
+
+		if i == groupNumber-1 {
+
+			group := TournamentGroup{
+				Name:  "Group" + " " + strconv.Itoa(i+1),
+				Teams: allTeams[currentGroup-maxNumberPerGroup:],
+			}
+
+			count := 1
+			for {
+				if len(group.Teams) >= minNumberPerGroup {
+					break
+				} else {
+					teamGroups := groups[len(groups)-count].Teams
+
+					if len(teamGroups) > minNumberPerGroup {
+						group.Teams = append(group.Teams, teamGroups[len(teamGroups)-1])
+						groups[len(groups)-count].Teams = teamGroups[:len(teamGroups)-1]
+					} else {
+						count++
+					}
+
+				}
+
+				if count > len(groups) {
+					break
+				}
+			}
+
+			groups = append(groups, group)
+
+		} else {
+			group := TournamentGroup{
+				Name:  "Group" + " " + strconv.Itoa(i+1),
+				Teams: allTeams[currentGroup-maxNumberPerGroup : currentGroup],
+			}
+
+			groups = append(groups, group)
+		}
+
 	}
+
+	return groups
 }
