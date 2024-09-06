@@ -874,7 +874,7 @@ func GroupTournament() gin.HandlerFunc {
 				return
 			}
 
-			c.JSON(http.StatusOK, gin.H{"message": "Tournament grouped successfully", "hasError": groups})
+			c.JSON(http.StatusOK, gin.H{"message": "Tournament grouped successfully", "hasError": false})
 		} else {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Tournament is already drawn", "hasError": true})
 		}

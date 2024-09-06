@@ -2,6 +2,8 @@ package models
 
 import (
 	"math/rand"
+	"sort"
+	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -50,6 +52,7 @@ type Draw struct {
 	Link         string             `json:"Link"`
 	Group        string             `json:"Group"`
 	BRTeams      []BRTeams          `json:"BRTeams"`
+	IsPlayed     bool               `json:"IsPlayed"`
 }
 
 type AllDraws []Draw
@@ -76,6 +79,63 @@ func (a AllTeams) Shuffle() {
 
 		a[i], a[newPosition] = a[newPosition], a[i]
 	}
+}
+
+func (tg TournamentGroups) ShuffleTournamentGroups() {
+	source := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(source)
+
+	// Loop through the slice from the end to the beginning
+	for i := len(tg) - 1; i > 0; i-- {
+		// Pick a random index from 0 to i using the new random object
+		j := r.Intn(i + 1)
+
+		// Swap tg[i].Teams[1] with tg[j].Teams[1]
+		tg[i].Teams[1], tg[j].Teams[1] = tg[j].Teams[1], tg[i].Teams[1]
+	}
+}
+
+func (a AllTeams) GetTopTwo(name string) TournamentGroup {
+	// Sort by Points first
+	sort.SliceStable(a, func(i, j int) bool {
+		return a[i].Points > a[j].Points
+	})
+
+	// Check if top 2 teams have the same points
+	if len(a) > 2 && a[0].Points == a[1].Points {
+		// Find the range where teams have the same points as the top team
+		end := 2
+		for end < len(a) && a[end].Points == a[0].Points {
+			end++
+		}
+
+		// Sort that range by GoalsDifference
+		sort.SliceStable(a[:end], func(i, j int) bool {
+			return a[i].GoalsDifference > a[j].GoalsDifference
+		})
+
+		// If GoalsDifference is also the same, sort by GoalsScored
+		if a[0].GoalsDifference == a[1].GoalsDifference {
+			sort.SliceStable(a[:end], func(i, j int) bool {
+				return a[i].GoalsScored > a[j].GoalsScored
+			})
+
+			// If GoalsScored is also the same, sort by alphabetical order
+			if a[0].GoalsScored == a[1].GoalsScored {
+				sort.SliceStable(a[:end], func(i, j int) bool {
+					return strings.ToLower(a[i].TeamName) < strings.ToLower(a[j].TeamName)
+				})
+			}
+		}
+	}
+
+	tg := TournamentGroup{
+		Name:  name,
+		Teams: a[:2],
+	}
+
+	// Return the top 2 teams
+	return tg
 }
 
 // Pair method to pair up elements in the RegisterTournamentSlice
@@ -153,4 +213,29 @@ func (a AllDraws) ExtractTeam() AllTeams {
 		teams = append(teams, team)
 	}
 	return teams
+}
+
+func (ts *AllTeams) UpdateTeamScore(name string, gf, ga, points int) {
+	for i := range *ts {
+		if (*ts)[i].TeamName == name {
+			(*ts)[i].Points += points
+			(*ts)[i].GoalsScored += gf
+			(*ts)[i].GoalsReceived += ga
+			(*ts)[i].GoalsDifference = (*ts)[i].GoalsScored - (*ts)[i].GoalsReceived
+			break
+		}
+	}
+
+	sort.SliceStable(*ts, func(i, j int) bool {
+		if (*ts)[i].Points != (*ts)[j].Points {
+			return (*ts)[i].Points > (*ts)[j].Points
+		}
+		if (*ts)[i].GoalsDifference != (*ts)[j].GoalsDifference {
+			return (*ts)[i].GoalsDifference > (*ts)[j].GoalsDifference
+		}
+		if (*ts)[i].GoalsScored != (*ts)[j].GoalsScored {
+			return (*ts)[i].GoalsScored > (*ts)[j].GoalsScored
+		}
+		return (*ts)[i].TeamName < (*ts)[j].TeamName
+	})
 }

@@ -56,7 +56,7 @@ type TournamentGroup struct {
 
 type TournamentGroups []TournamentGroup
 
-func (tg *TournamentGroup) PairTournamentGroups(tournamentId string) AllDraws {
+func (tg *TournamentGroup) PairTournamentGroups(tournamentId string, stage int) AllDraws {
 	var drawSlice AllDraws
 	var draw Draw
 
@@ -67,6 +67,7 @@ func (tg *TournamentGroup) PairTournamentGroups(tournamentId string) AllDraws {
 			draw.InitDraw()
 			draw.TournamentId = tournamentId
 			draw.Group = tg.Name
+			draw.Stage = stage
 			drawSlice = append(drawSlice, draw)
 		}
 	}

@@ -18,7 +18,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	// "go.mongodb.org/mongo-driver/bson"
-	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -53,18 +52,127 @@ func NewDraw() gin.HandlerFunc {
 
 		if *tournament.TournamentMode == "GROUPS" {
 
-			for _, tournamentGroup := range tournament.Groups {
-				allDraws = append(allDraws, tournamentGroup.PairTournamentGroups(draw.TournamentId)...)
+			if tournament.Stage == 0 {
+				for _, tournamentGroup := range tournament.Groups {
+					allDraws = append(allDraws, tournamentGroup.PairTournamentGroups(draw.TournamentId, 1)...)
+				}
+
+				err = queries.SaveMultiDraws(allDraws)
+
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to draw teams", "hasError": true})
+					return
+				}
+
+				tournament.Stage = 1
+				_, err = queries.UpdateTournamentQuery(draw.TournamentId, tournament)
+
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to update tournament stage", "hasError": true})
+					return
+				}
+
+				draws, err := queries.GetCurrentStageTeamsQuery(draw.TournamentId, tournament.Stage)
+
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to get teams", "hasError": true})
+					return
+				}
+				startTournament := queries.StartTournamentQuery(draw.TournamentId)
+				if startTournament.Err() != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to start tournament", "hasError": true})
+					return
+				}
+
+				c.JSON(http.StatusOK, gin.H{"message": "Next draw processed successfully", "data": draws, "teams": tournament.Groups, "hasError": false})
+
+			} else if tournament.Stage == 1 {
+				tournamentGroups := tournament.Groups
+
+				var tg models.TournamentGroups
+				for _, tournamentGroup := range tournamentGroups {
+					tg = append(tg, tournamentGroup.Teams.GetTopTwo(tournamentGroup.Name))
+				}
+
+				tg.ShuffleTournamentGroups()
+
+				for _, tournamentGroup := range tg {
+					allDraws = append(allDraws, tournamentGroup.PairTournamentGroups(draw.TournamentId, 2)...)
+				}
+
+				err = queries.SaveMultiDraws(allDraws)
+
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to draw teams", "hasError": true})
+					return
+				}
+
+				tournament.Groups = tg
+				tournament.Stage = 2
+				_, err = queries.UpdateTournamentQuery(draw.TournamentId, tournament)
+
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to update tournament stage", "hasError": true})
+					return
+				}
+
+				draws, err := queries.GetCurrentStageTeamsQuery(draw.TournamentId, tournament.Stage)
+
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to get teams", "hasError": true})
+					return
+				}
+
+				c.JSON(http.StatusOK, gin.H{"message": "Next draw processed successfully", "data": draws, "teams": tg, "hasError": false})
+
+			} else {
+				draws, err := queries.GetCurrentStageTeamsQuery(draw.TournamentId, tournament.Stage)
+
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to get teams", "hasError": true})
+					return
+				}
+				if len(draws) <= 1 {
+					c.JSON(http.StatusBadRequest, gin.H{"message": "You can't draw with less than three teams", "hasError": true})
+					return
+				}
+				for _, draw := range draws {
+					if draw.Winner == "" && draw.Team2.TeamName != "Automatic Qualification" {
+						c.JSON(http.StatusBadRequest, gin.H{"message": "Scores has not been added to all draws", "hasError": true})
+						return
+					}
+				}
+				teams = draws.ExtractTeam()
+
+				paired := teams.Pair()
+
+				allDraws = paired.Generate1V1DrawsFromPairs(tournament)
+
+				startTournament := queries.StartTournamentQuery(draw.TournamentId)
+				if startTournament.Err() != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to start tournament", "hasError": true})
+					return
+				}
+
+				tournament.Stage = tournament.Stage + 1
+
+				_, err = queries.UpdateTournamentQuery(draw.TournamentId, tournament)
+
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to draw teams", "hasError": true})
+					return
+				}
+
+				err = queries.SaveMultiDraws(allDraws)
+
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to draw teams", "hasError": true})
+					return
+				}
+
+				c.JSON(http.StatusOK, gin.H{"message": "Next draw processed successfully", "data": allDraws, "teams": teams, "hasError": false})
 			}
 
-			err = queries.SaveMultiDraws(allDraws)
-
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to draw teams", "hasError": true})
-				return
-			}
-
-			c.JSON(http.StatusOK, gin.H{"message": "Next draw processed successfully", "data": allDraws, "teams": teams, "hasError": false})
 		} else {
 
 			draw.InitDraw()
@@ -625,16 +733,16 @@ func AddScore() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("drawId")
 		type Score struct {
-			Team1        interface{} `json:"Team1" validate:"required"`
-			Team2        interface{} `json:"Team2" validate:"required"`
-			Winner       string      `json:"Winner" validate:"required"`
-			TournamentId string      `json:"TournamentId" validate:"required"`
-			WinnerTeam   interface{} `json:"WinnerTeam" validate:"required"`
-			IsFinal      string      `json:"IsFinal" validate:"required"`
+			Team1        int          `json:"Team1" validate:"required"`
+			Team2        int          `json:"Team2" validate:"required"`
+			Winner       string       `json:"Winner"`
+			TournamentId string       `json:"TournamentId" validate:"required"`
+			WinnerTeam   models.Teams `json:"WinnerTeam""`
+			IsFinal      string       `json:"IsFinal"`
 		}
 		var data Score
 
-		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var _, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		defer cancel()
 
 		if err := c.BindJSON(&data); err != nil {
@@ -649,45 +757,96 @@ func AddScore() gin.HandlerFunc {
 			defer cancel()
 			return
 		}
-		log.Println("TournamentId:", data.WinnerTeam)
 
-		filtert := bson.M{"tournamentid": data.TournamentId}
-
-		updatet := bson.M{
-			"$set": bson.M{"Winner": data.WinnerTeam},
+		if data.Team1 > data.Team2 {
+			data.Winner = "Team1"
+		} else if data.Team2 > data.Team1 {
+			data.Winner = "Team2"
+		} else {
+			data.Winner = "Draw"
 		}
 
-		upsert := true
-		after := options.After
-		opt := options.FindOneAndUpdateOptions{
-			ReturnDocument: &after,
-			Upsert:         &upsert,
-		}
-
-		if data.IsFinal == "true" {
-			resultT := tournamentCollection.FindOneAndUpdate(ctx, filtert, updatet, &opt)
-
-			if resultT.Err() != nil {
-				c.JSON(http.StatusOK, gin.H{"message": validationErr.Error(), "hasError": true})
-				defer cancel()
-				return
-			}
-		}
-
-		filter := bson.M{"drawid": id}
-
-		update := bson.M{
-			"$set": bson.M{"Team1Score": data.Team1, "Team2Score": data.Team2, "Winner": data.Winner, "winner": data.Winner},
-		}
-
-		result := drawCollection.FindOneAndUpdate(ctx, filter, update, &opt)
-		if result.Err() != nil {
-			c.JSON(http.StatusOK, gin.H{"message": validationErr.Error(), "hasError": true})
-			defer cancel()
+		tournament, err := queries.GetSingleTournamentQuery(data.TournamentId)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "hasError": true})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "Scores added successfully", "draws": result, "hasError": false})
+		draw, err := queries.GetSingleDrawQuery(id)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "hasError": true})
+			return
+		}
+
+		if draw.IsPlayed {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Draw has already been played", "hasError": true})
+			return
+		} else {
+
+			if *tournament.TournamentMode == "GROUPS" && tournament.Stage == 1 {
+
+				for _, group := range tournament.Groups {
+					if group.Name == draw.Group {
+						if data.Team1 > data.Team2 {
+							group.Teams.UpdateTeamScore(draw.Team1.TeamName, data.Team1, data.Team2, tournament.PointSystem.Win)
+							group.Teams.UpdateTeamScore(draw.Team2.TeamName, data.Team2, data.Team1, 0)
+						} else if data.Team2 > data.Team1 {
+							group.Teams.UpdateTeamScore(draw.Team1.TeamName, data.Team1, data.Team2, 0)
+							group.Teams.UpdateTeamScore(draw.Team2.TeamName, data.Team2, data.Team1, tournament.PointSystem.Win)
+						} else {
+							group.Teams.UpdateTeamScore(draw.Team1.TeamName, data.Team1, data.Team2, tournament.PointSystem.Draw)
+							group.Teams.UpdateTeamScore(draw.Team2.TeamName, data.Team2, data.Team1, tournament.PointSystem.Draw)
+						}
+					}
+				}
+
+				_, err = queries.UpdateTournamentQuery(draw.TournamentId, tournament)
+
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to update tournament", "hasError": true})
+					return
+				}
+
+				draw.Team1Score = data.Team1
+				draw.Team2Score = data.Team2
+				draw.Winner = data.Winner
+				draw.IsPlayed = true
+
+				_, err := queries.UpdateDrawQuery(draw.DrawId, draw)
+
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to update draw", "hasError": true})
+				}
+
+				c.JSON(http.StatusOK, gin.H{"message": "Scores added successfully", "draws": tournament.Groups, "hasError": false})
+			} else {
+
+				if data.IsFinal == "true" {
+					tournament.Winner = data.WinnerTeam
+					_, err = queries.UpdateTournamentQuery(draw.TournamentId, tournament)
+
+					if err != nil {
+						c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to update tournament", "hasError": true})
+						return
+					}
+
+				}
+
+				draw.Team1Score = data.Team1
+				draw.Team2Score = data.Team2
+				draw.Winner = data.Winner
+				draw.IsPlayed = true
+
+				result, err := queries.UpdateDrawQuery(draw.DrawId, draw)
+
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to update draw", "hasError": true})
+				}
+
+				c.JSON(http.StatusOK, gin.H{"message": "Scores added successfully", "draws": result, "hasError": false})
+
+			}
+		}
 	}
 }
 
