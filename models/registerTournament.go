@@ -6,26 +6,42 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type  Team struct {
-	UserName		string					`json:"UserName" validate:"required"`
-	GameUserName	string					`json:"GameUserName" validate:"required"`
-	User_id			string					`json:"User_id" validate:"required"`
-	Email			string					`json:"Email" validate:"required"`
+type Team struct {
+	UserName     string `json:"UserName" validate:"required"`
+	GameUserName string `json:"GameUserName" validate:"required"`
+	User_id      string `json:"User_id" validate:"required"`
+	Email        string `json:"Email" validate:"required"`
 }
 
-type RegisterTournament struct{
-	ID						primitive.ObjectID		`bson:"_id" validate:"required"`
-	Players					[]Player				`json:"Players" validate:"required"`
-	Created_at				time.Time				`json:"Created_at" validate:"required"`
-	Updated_at				time.Time				`json:"Updated_at" validate:"required"`
-	TournamentId			string					`json:"TournamentId" validate:"required"`
-	TournamentName			string					`json:"TournamentName" validate:"required"`
-	TournamentIcon			string					`json:"TournamentIcon" validate:"required"`
-	TournamentDate			string					`json:"TournamentDate" validate:"required"`
-	RegisterTournamentId	string					`json:"RegisterTournamentId" validate:"required"`
-	TeamName				string					`json:"TeamName" validate:"required"`
-	RefNumber				string					`json:"RefNumber"`
-	PaymentChannel			string					`json:"PaymentChannel"`
-	Amount					int						`json:"Amount"`
-	Icon					string					`json:"Icon" validate:"required"`
+type RegisterTournament struct {
+	ID                   primitive.ObjectID `bson:"_id" validate:"required"`
+	Players              []Player           `json:"Players" validate:"required"`
+	Created_at           time.Time          `json:"Created_at" validate:"required"`
+	Updated_at           time.Time          `json:"Updated_at" validate:"required"`
+	TournamentId         string             `json:"TournamentId" validate:"required"`
+	TournamentName       string             `json:"TournamentName" validate:"required"`
+	TournamentIcon       string             `json:"TournamentIcon" validate:"required"`
+	TournamentDate       string             `json:"TournamentDate" validate:"required"`
+	RegisterTournamentId string             `json:"RegisterTournamentId" validate:"required"`
+	TeamName             string             `json:"TeamName" validate:"required"`
+	RefNumber            string             `json:"RefNumber"`
+	PaymentChannel       string             `json:"PaymentChannel"`
+	Amount               int                `json:"Amount"`
+	Icon                 string             `json:"Icon" validate:"required"`
+}
+
+type AllRegTeams []RegisterTournament
+
+// extract all teams from registered teams list
+func (a AllRegTeams) ExtractTeam() AllTeams {
+	teams := AllTeams{}
+
+	for _, oneTeam := range a {
+		team := Teams{}
+		team.Icon = oneTeam.Icon
+		team.Players = oneTeam.Players
+		team.TeamName = oneTeam.TeamName
+		teams = append(teams, team)
+	}
+	return teams
 }

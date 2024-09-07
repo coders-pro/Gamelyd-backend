@@ -8,7 +8,7 @@ import (
 
 func DrawRoutes(incomingRoutes *gin.Engine){
 	incomingRoutes.Use(middleware.Authenticate())
-	incomingRoutes.POST("/draws/save", controller.Draw())
+	incomingRoutes.POST("/draws/save", controller.NewDraw())
 	incomingRoutes.POST("/draws/drawBr", controller.DrawBr())
 	incomingRoutes.GET("/draws/:tornamentId", controller.GetDrawByTornamentID())
 	incomingRoutes.POST("/draws/addWinner/:drawId", controller.AddWinner())

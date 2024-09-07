@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/Gameware/database"
+	"github.com/Gameware/queries"
 	"github.com/Gameware/templates"
 
 	helper "github.com/Gameware/helpers"
@@ -40,6 +41,13 @@ func SaveTournament() gin.HandlerFunc {
 			return
 		}
 
+		if tournament.PointSystem.Draw == 0 {
+			tournament.PointSystem.Draw = 1
+		}
+
+		if tournament.PointSystem.Win == 0 {
+			tournament.PointSystem.Win = 3
+		}
 		tournament.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		tournament.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		tournament.ID = primitive.NewObjectID()
@@ -50,6 +58,7 @@ func SaveTournament() gin.HandlerFunc {
 		tournament.IsSuspended = false
 		tournament.Start = false
 		tournament.IsPaid = false
+		tournament.IsDrawn = false
 
 		validationErr := validate.Struct(tournament)
 		if validationErr != nil {
@@ -818,5 +827,56 @@ func AcceptInvite() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{"hasError": false, "data": result})
+	}
+}
+
+func GroupTournament() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tournamentId := c.Param("tournamentId")
+		_, err := primitive.ObjectIDFromHex(tournamentId)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid tournament id parameter", "hasError": true})
+			return
+		}
+
+		tournament, err := queries.GetSingleTournamentQuery(tournamentId)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to get tournament", "hasError": true})
+			return
+		}
+
+		if !tournament.IsDrawn {
+
+			tournamentParticipants, err := queries.GetRegisteredTeamsQuery(tournamentId)
+			minNoOfRegisteredTeams := 7
+
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "hasError": true})
+				return
+			}
+
+			if len(tournamentParticipants) < minNoOfRegisteredTeams {
+				c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Registered teams should not be below" + " " + strconv.Itoa(minNoOfRegisteredTeams), "hasError": true})
+				return
+			}
+
+			groups := models.GroupTeams(tournamentParticipants)
+
+			tournament.Groups = groups
+			tournament.IsDrawn = true
+
+			_, err = queries.UpdateTournamentQuery(tournamentId, tournament)
+
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to group teams", "hasError": true})
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{"message": "Tournament grouped successfully", "hasError": false})
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Tournament is already drawn", "hasError": true})
+		}
 	}
 }
